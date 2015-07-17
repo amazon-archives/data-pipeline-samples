@@ -1,0 +1,46 @@
+{
+  "objects": [
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "name": "DefaultResource1",
+      "keyPair": "macnew",
+      "amiVersion": "3.3",
+      "id": "ResourceId_9238U",
+      "type": "EmrCluster"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "scriptUri": "s3://<my-bucket>/runKinesisQuery.sh",
+      "name": "DefaultActivity1",
+      "id": "ActivityId_uJJlM",
+      "runsOn": {
+        "ref": "ResourceId_9238U"
+      },
+      "type": "ShellCommandActivity"
+    },
+    {
+      "period": "15 Minutes",
+      "name": "Every 15 minutes",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "s3://<my-log-location>",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    }
+  ],
+  "parameters": []
+}
