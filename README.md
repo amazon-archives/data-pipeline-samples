@@ -7,7 +7,7 @@ the License is located at
 
 http://aws.amazon.com/asl/
 
-![Data Pipeline Logo](https://raw.github.com/awslabs/data-pipeline-samples/samples/logo/logo.jpeg)
+![Data Pipeline Logo](https://raw.githubusercontent.com/awslabs/data-pipeline-samples/master/samples/logo/datapipelinelogo.jpeg)
 
 
 Data Pipeline Samples
