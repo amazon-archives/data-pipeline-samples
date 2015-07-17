@@ -1,5 +1,5 @@
-aws s3 cp s3://vinayakt-scripts/checkpointQuery.q .
-aws s3 cp s3://vinayakt-scripts/createTableFromKinesisStream.q .
+aws s3 cp s3://<my-bucket>/checkpointQuery.q .
+aws s3 cp s3://<my-bucket>/createTableFromKinesisStream.q .
 
 ITERATION_COUNT=0;
 if [ -a /mnt/taskRunner/iterationCount ]; then
