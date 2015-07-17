@@ -9,7 +9,7 @@
       },
       "scheduleType": "cron",
       "resourceRole": "DataPipelineDefaultResourceRole",
-      "role": "DataPipelineDefaultRole",
+      "role": "DataPipelineDefaultRole"
     },
     {
       "name": "Every 1 day",
@@ -23,7 +23,7 @@
       "id": "EmrSqoopCluster",
       "type": "EmrCluster",
       "taskInstanceType": "#{myTaskInstanceType}",
-      "bootstrapAction": "#{myBootstrapAction}",
+      "bootstrapAction": ["#{myBootStrapAction}"],
       "taskInstanceCount": "#{myTaskInstanceCount}",
       "coreInstanceType": "#{myCoreInstanceType}",
       "keyPair": "#{myEC2KeyPair}",
@@ -36,7 +36,6 @@
       "name": "EmrSqoopActivity",
       "id": "EmrSqoopActivity",
       "type": "EmrActivity",
-      "preStepCommand": "",
       "step": "#{sqoop command}",   
       "runsOn": {
         "ref": "EmrSqoopCluster"
@@ -54,8 +53,10 @@
   "values": {
     "myMasterInstanceType": "m1.medium",
     "myEMRAMIVersion": "2.4.8",
-    "myEmrStep": "s3://sqoop-test-123",
+    "myEmrStep": "sqoop --version",
     "myCoreInstanceCount": "2",
-    "myCoreInstanceType": "m1.medium"
+    "myCoreInstanceType": "m1.medium",
+    "myBootStrapAction": "s3://rapmeduce/scripts/install_sqoop.sh",
+    "myEC2KeyPair": "auslee-dpl-dev-us-east-1"
   }
 }
