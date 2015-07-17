@@ -1,0 +1,47 @@
+{
+  "objects": [
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "s3://<mybucket>/data-pipeline-samples/helloworld/",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "name": "NewEC2Instance",
+      "id": "NewEC2Instance",
+      "type": "Ec2Resource",
+      "terminateAfter": "1 Hour"
+    },
+    {
+      "occurrences": "1",
+      "period": "1 Day",
+      "name": "RunOnce",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "name": "DefaultActivity1",
+      "id": "ActivityId_qkQ3c",
+      "runsOn": {
+        "ref": "NewEC2Instance"
+      },
+      "type": "ShellCommandActivity",
+      "command": "echo 'Hello World!'"
+    }
+  ]
+}
