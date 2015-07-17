@@ -13,10 +13,55 @@ AWS Data Pipeline is a web service that you can use to automate the movement and
 Follow the instructions [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html) to install the AWS CLI
 
 ##Create default IAM Roles
+Create the following files defining the trusted entities for the 2 roles.
+
+AWSDataPipeline_DefaultAssumeRole.json
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": [
+          "datapipeline.amazonaws.com",
+          "elasticmapreduce.amazonaws.com"
+        ]
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+```
+
+EC2_DefaultAssumeRole.json
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": [
+          "ec2.amazonaws.com"
+        ]
+      },
+      "Action": "sts:AssumeRole"
+    }
+  ]
+}
+```
+
 From your CLI run the following command to create the the default IAM roles for use in Pipeline Definitions. 
 
 ```sh
- $> aws cli 
+aws iam create-role --role-name DataPipelineDefaultRole --assume-role-policy-document file://AWSDataPipeline_DefaultAssumeRole.json
+aws iam attach-role-policy --role-name DataPipelineDefaultRole --policy-arn arn:aws:iam::aws:policy/service-role/AWSDataPipelineRole
+
+aws iam create-role --role-name DataPipelineDefaultResourceRole --assume-role-policy-document file://EC2_DefaultAssumeRole.json
+aws iam attach-role-policy --role-name DataPipelineDefaultResourceRole --policy-arn arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforDataPipelineRole
+aws iam create-instance-profile --instance-profile-name DataPipelineDefaultResourceRole
+aws iam add-role-to-instance-profile --instance-profile DataPipelineDefaultResourceRole --role-name DataPipelineDefaultResourceRole
 ```
 
 ##Get the samples
