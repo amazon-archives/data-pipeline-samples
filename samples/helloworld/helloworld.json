@@ -6,7 +6,7 @@
       },
       "resourceRole": "DataPipelineDefaultResourceRole",
       "role": "DataPipelineDefaultRole",
-      "pipelineLogUri": "s3://<mybucket>/data-pipeline-samples/helloworld/",
+      "pipelineLogUri": "#{myS3LogsPath}",
       "scheduleType": "cron",
       "name": "Default",
       "id": "Default"
@@ -43,5 +43,12 @@
       "type": "ShellCommandActivity",
       "command": "echo 'Hello World!'"
     }
-  ]
+  ],
+"parameters": [
+     {
+        "id" : "myS3LogsPath",
+        "type" : "AWS::S3::ObjectKey",
+        "description" : "S3 path for instance logs"
+     }
+   ]
 }
