@@ -1,7 +1,7 @@
 THIS IS A WORK IN PROGRESS
 =====================
 
-![Data Pipeline Logo](https://raw.githubusercontent.com/awslabs/data-pipeline-samples/master/samples/logo/datapipelinelogo.jpeg)
+![Data Pipeline Logo](https://raw.githubusercontent.com/awslabs/data-pipeline-samples/master/setup/logo/datapipelinelogo.jpeg)
 
 Data Pipeline Samples
 =====================
