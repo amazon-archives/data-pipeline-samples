@@ -1,0 +1,59 @@
+{
+  "objects": [
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "name": "DefaultResource1",
+      "id": "ResourceId_14TQt",
+      "type": "Ec2Resource",
+      "imageId": "ami-1ccae774"
+    },
+    {
+      "period": "1 days",
+      "name": "Every 1 day",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myPipelinelogUri}",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "scriptUri": "s3://data-pipeline-samples/python-template/run-python.sh",
+      "scriptArgument" : "#{myScriptValue}",
+      "name": "PythonShell",
+      "id": "ActivityId_Sxv7i",
+      "runsOn": {
+        "ref": "ResourceId_14TQt"
+      },
+      "type": "ShellCommandActivity"
+    }
+  ],
+  "parameters": [
+      {
+          "id" : "myScriptValue",
+          "type" : "AWS::S3::ObjectKey",
+          "description" : "Please specify the list of python scripts to be run in the sequence seperated by comma"
+      },
+      {
+          "id" : "myPipelinelogUri",
+          "type" : "AWS::S3::ObjectKey",
+          "description" : "Please add the log location for datapipeline to use"
+      }
+   ]
+}
