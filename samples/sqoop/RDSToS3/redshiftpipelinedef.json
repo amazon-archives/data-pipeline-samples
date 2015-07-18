@@ -1,4 +1,4 @@
-{
+  {
   "objects": [
     {
       "period": "1 days",
@@ -151,14 +151,14 @@
     }
   ],
   "values": {
-    "myRedshiftUsername": "beitchman1",
+    "myRedshiftUsername": "",
     "myRedshiftCreateTableSql": "create table songs(track_id varchar(2048) not null distkey sortkey, title varchar(2048), song_id varchar(2048), release_name varchar(2048), artist_id varchar(2048), artist_mbid varchar(2048), artist_name varchar(2048), duration float, artist_familiarity float, artist_hotness float, year int);",
-    "myRedshiftDbName": "dev",
-    "myRedshiftJdbcConnectStr": "jdbc:redshift://dpl-redshift.c3m4tjmvavo4.us-east-1.redshift.amazonaws.com:5439/dev",
-    "*myRedshiftPassword": "Beitchman1",
+    "myRedshiftDbName": "",
+    "myRedshiftJdbcConnectStr": "",
+    "*myRedshiftPassword": "",
     "myInsertMode": "OVERWRITE_EXISTING",
     "myRedshiftSecurityGrps": "default",
     "myRedshiftTableName": "songs",
-    "myInputS3Loc": "s3://data-pipeline-samples/sqoop-activity/test-data/part-m-00005 (3)"
+    "myInputS3Loc": ""
   }
 }
