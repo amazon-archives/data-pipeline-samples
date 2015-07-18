@@ -46,7 +46,7 @@ Use the setup_roles.sh command to get your default roles setup.
 
 $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/helloworld/helloworld.json --parameter-values myS3LogsPath="<your s3 logging path>"
 
-# You receive a validation messages like this
+# You receive validation messages like this
 
 
 ```
