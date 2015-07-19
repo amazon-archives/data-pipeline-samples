@@ -1,0 +1,154 @@
+{
+  "objects": [
+    {
+      "connectionString": "#{myRedshiftJdbcConnectStr}",
+      "databaseName": "#{myRedshiftDbName}",
+      "*password": "#{*myRedshiftPassword}",
+      "name": "RedshiftCluster",
+      "id": "RedshiftCluster",
+      "type": "RedshiftDatabase",
+      "username": "#{myRedshiftUsername}"
+    },
+    {
+      "occurrences": "1",
+      "period": "1 Day",
+      "name": "RunOnce",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "instanceType": "t1.micro",
+      "name": "Ec2Instance",
+      "securityGroups": "#{myRedshiftSecurityGrps}",
+      "id": "Ec2Instance",
+      "type": "Ec2Resource",
+      "terminateAfter": "2 Hours"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "s3://setl-user-dev-logs/logs/",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "output": {
+        "ref": "DestRedshiftTable"
+      },
+      "input": {
+        "ref": "S3InputDataNode"
+      },
+      "name": "RedshiftLoadActivity",
+      "commandOptions": "#{myRedshiftCopyOpts}",
+      "runsOn": {
+        "ref": "Ec2Instance"
+      },
+      "id": "RedshiftLoadActivity",
+      "type": "RedshiftCopyActivity",
+      "insertMode": "TRUNCATE"
+    },
+    {
+      "database": {
+        "ref": "RedshiftCluster"
+      },
+      "createTableSql": "#{myRedshiftCreateTableSql}",
+      "primaryKeys": "#{myPrimaryKeys}",
+      "name": "DestRedshiftTable",
+      "id": "DestRedshiftTable",
+      "type": "RedshiftDataNode",
+      "tableName": "#{myRedshiftTableName}"
+    },
+    {
+      "directoryPath": "#{myInputS3Loc}",
+      "name": "S3InputDataNode",
+      "id": "S3InputDataNode",
+      "type": "S3DataNode"
+    }
+  ],
+  "parameters": [
+    {
+      "description": "Redshift password",
+      "id": "*myRedshiftPassword",
+      "type": "String"
+    },
+    {
+      "description": "Redshift database name",
+      "id": "myRedshiftDbName",
+      "type": "String"
+    },
+    {
+      "default": "default",
+      "watermark": "security group name",
+      "helpText": "The names of one or more security groups that are assigned to the Redshift cluster.",
+      "description": "Redshift security group(s)",
+      "isArray": "true",
+      "id": "myRedshiftSecurityGrps",
+      "type": "String"
+    },
+    {
+      "description": "Redshift username",
+      "id": "myRedshiftUsername",
+      "type": "String"
+    },
+    {
+      "watermark": "CREATE TABLE IF NOT EXISTS #{tableName} (id varchar(255), name varchar(255), address varchar(255), primary key(id)) distkey(id) sortkey(id);",
+      "helpText": "The SQL statement to create the Redshift table if it does not already exist.",
+      "description": "Create table SQL query",
+      "optional": "true",
+      "id": "myRedshiftCreateTableSql",
+      "type": "String"
+    },
+    {
+      "helpText": "The name of an existing table or a new table that will be created based on the create table SQL query parameter below.",
+      "description": "Redshift table name",
+      "id": "myRedshiftTableName",
+      "type": "String"
+    },
+    {
+      "helpText": "The S3 folder where one or more input files are located.",
+      "description": "Input S3 folder",
+      "id": "myInputS3Loc",
+      "type": "AWS::S3::ObjectKey"
+    },
+    {
+      "watermark": "jdbc:postgresql://endpoint:port/database?tcpKeepAlive=true",
+      "description": "Redshift JDBC connection string",
+      "id": "myRedshiftJdbcConnectStr",
+      "type": "String"
+    },
+    {
+      "helpLink": "https://docs.aws.amazon.com/console/datapipeline/redshiftcopyactivity",
+      "watermark": "IGNOREHEADER AS 1",
+      "helpText": "COPY parameters to pass to Redshift",
+      "description": "Copy options",
+      "isArray": "true",
+      "optional": "true",
+      "id": "myRedshiftCopyOpts",
+      "type": "String"
+    },
+    {
+      "helpLink": "https://docs.aws.amazon.com/console/datapipeline/dp_object_redshiftdatanode",
+      "helpText": "The names of all primary key columns in the Redshift table used to merge existing data with new data.",
+      "description": "Primary keys",
+      "isArray": "true",
+      "optional": "true",
+      "id": "myPrimaryKeys",
+      "type": "String"
+    }
+  ],
+  "values": {
+    "myRedshiftUsername": "dpluser1",
+    "myRedshiftDbName": "dev",
+    "myRedshiftJdbcConnectStr": "jdbc:postgresql://dpl-sample-redshift.c3m4tjmvavo4.us-east-1.redshift.amazonaws.com:5439/dev",
+    "*myRedshiftPassword": "dPLUSER1",
+    "myRedshiftSecurityGrps": "default",
+    "myRedshiftTableName": "songs",
+    "myInputS3Loc": "s3://data-pipeline-samples/sqoop-activity/test-data/part-m-00005"
+  }
+}
