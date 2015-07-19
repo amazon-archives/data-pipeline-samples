@@ -14,7 +14,7 @@
       },
       "resourceRole": "DataPipelineDefaultResourceRole",
       "role": "DataPipelineDefaultRole",
-      "pipelineLogUri": "s3://austin-dp-dev",
+      "pipelineLogUri": "s3://data-pipeline-samples/sqoop-activity",
       "scheduleType": "cron",
       "name": "Default",
       "id": "Default"
@@ -23,28 +23,26 @@
       "schedule": {
         "ref": "DefaultSchedule"
       },
-      "bootstrapAction": "s3://data-pipeline-samples/sqoop-activity/install_sqoop_bs.sh",
-      "maximumRetries": "0",
-      "name": "DefaultEmrCluster1",
-      "keyPair": "auslee-dpl-dev-us-east-1",
-      "id": "EmrClusterId_itsxt",
-      "amiVersion": "3.8.0",
-      "masterInstanceType": "m3.xlarge",
-      "type": "EmrCluster",
-      "terminateAfter": "1 Day"
-    },
-    {
-      "schedule": {
-        "ref": "DefaultSchedule"
-      },
       "name": "SqoopActivity",
-      "step": "dummy_step_does_nothing",
-      "preStepCommand": "sqoop import --connect jdbc:mysql://dpl-sample-db.cavqlm7jzxfc.us-east-1.rds.amazonaws.com/millionsongs --table songs --target-dir s3://data-pipeline-samples/sqoop-activity/songs-`date +\"%m-%d-%Y-%T\" | sed \"s/:/-/g\"` --username dpl-sample-user",
+      "step": "s3://elasticmapreduce/libs/script-runner/script-runner.jar,s3://data-pipeline-samples/sqoop-activity/run_sqoop_job.sh",
       "runsOn": {
         "ref": "EmrClusterId_itsxt"
       },
       "id": "ActivityId_6vvjv",
       "type": "EmrActivity"
+    },
+    {
+      "bootstrapAction": "s3://data-pipeline-samples/sqoop-activity/install_sqoop_ba.sh",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "maximumRetries": "0",
+      "name": "DefaultEmrCluster1",
+      "id": "EmrClusterId_itsxt",
+      "amiVersion": "3.8.0",
+      "masterInstanceType": "m3.xlarge",
+      "type": "EmrCluster",
+      "terminateAfter": "1 Day"
     }
   ],
   "parameters": []
