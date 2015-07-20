@@ -1,9 +1,15 @@
 #!/bin/bash
 
 cli_root=$1
-definition="file://`pwd`/SqoopRDSToS3Sample.json"
+definition="file://`pwd`/SampleSqoopRDSToRedshift.json"
+if [ -d "$2" ]
+then
+    definition="file://`pwd`/$2"
+fi
 timestamp=`date +%m-%d-%Y-%T | sed "s/:/-/g"`
 region="us-east-1"
+
+$cli_root/bin/aws s3 rm s3://data-pipeline-samples/sqoop-activity/staging --recursive 
 
 # Create a new Data Pipeline and save its ID
 pipelineId=`$cli_root/bin/aws datapipeline create-pipeline --region $region --name "Sqoop Sample Activity" --unique-id sqoop_sample_activity_$timestamp | grep pipelineId | cut -d: -f2 | sed "s/ //g" | sed "s/\"//g"`

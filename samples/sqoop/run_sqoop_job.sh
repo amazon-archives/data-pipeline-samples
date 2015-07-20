@@ -3,7 +3,7 @@
 sample_db_host="dpl-sample-db.cavqlm7jzxfc.us-east-1.rds.amazonaws.com"
 sample_database="millionsongs"
 sample_table="songs"
-sample_target_dir="s3://data-pipeline-samples/sqoop-activity/songs-`date +"%m-%d-%Y-%T" | sed "s/:/-/g"`"
+sample_target_dir="s3://data-pipeline-samples/sqoop-activity/staging"
 sample_user="dpl-sample-user"
 
 host=$sample_db_host
