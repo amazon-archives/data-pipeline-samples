@@ -1,0 +1,13 @@
+{ "values":
+  { "myBackupLocation": ""
+  , "myOracleDriverLocation": ""
+  , "myOracleHost": ""
+  , "myOraclePort": ""
+  , "myOracleDatabase": ""
+  , "myOracleUser": ""
+  , "myOraclePassword": ""
+  , "myOracleTable": ""
+  , "myTerminateAfter": ""
+  , "myPipelineLogUri": ""
+  }
+}

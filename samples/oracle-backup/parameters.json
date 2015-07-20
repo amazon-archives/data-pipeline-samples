@@ -1,0 +1,43 @@
+{ "parameters":
+  [ { "id": "myBackupLocation"
+    , "description": "S3 backup location"
+    , "type": "AWS::S3::ObjectKey"
+    }
+  , { "id": "myOracleDriverLocation"
+    , "description": "S3 location to fetch Oracle JDBC driver from"
+    , "type": "AWS::S3::ObjectKey"
+    }
+  , { "id": "myOracleHost"
+    , "description": "Oracle host address"
+    , "type": "String"
+    }
+  , { "id": "myOraclePort"
+    , "description": "Oracle port"
+    , "type": "Integer"
+    }
+  , { "id": "myOracleDatabase"
+    , "description": "Oracle SID/database"
+    , "type": "String"
+    }
+  , { "id": "myOracleUser"
+    , "description": "Oracle user"
+    , "type": "String"
+    }
+  , { "id": "myOraclePassword"
+    , "description": "Oracle password"
+    , "type": "String"
+    }
+  , { "id": "myOracleTable"
+    , "description": "Name of the Oracle table to back up"
+    , "type": "String"
+    }
+  , { "id": "myTerminateAfter"
+    , "description": "Terminate instance after a certain amount of time"
+    , "type": "String"
+    }
+  , { "id": "myPipelineLogUri"
+    , "description": "Log pipeline execution details to an S3 location"
+    , "type": "AWS::S3::ObjectKey"
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{ "objects":
+  [ { "id": "S3"
+    , "name": "Backup Location"
+    , "type": "S3DataNode"
+    , "directoryPath": "#{myBackupLocation}/#{day(@scheduledStartTime)}/"
+    , "schedule":
+      { "ref": "DefaultSchedule" }
+    }
+  , { "id": "DefaultSchedule"
+    , "name": "Every 1 day"
+    , "type": "Schedule"
+    , "period": "1 days"
+    , "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    }
+  , { "id": "Instance"
+    , "name": "Instance"
+    , "type": "Ec2Resource"
+    , "role": "DataPipelineDefaultRole"
+    , "resourceRole": "DataPipelineDefaultResourceRole"
+    , "terminateAfter": "#{myTerminateAfter}"
+    , "schedule":
+      { "ref": "DefaultSchedule" }
+    }
+  , { "id": "Default"
+    , "name": "Default"
+    , "role": "DataPipelineDefaultRole"
+    , "resourceRole": "DataPipelineDefaultResourceRole"
+    , "failureAndRerunMode": "CASCADE"
+    , "pipelineLogUri": "#{myPipelineLogUri}"
+    , "scheduleType": "cron"
+    , "schedule":
+      { "ref": "DefaultSchedule" }
+    }
+  , { "id": "OracleDatabase"
+    , "name": "Oracle Database"
+    , "type": "JdbcDatabase"
+    , "jdbcDriverJarUri": "#{myOracleDriverLocation}"
+    , "jdbcDriverClass": "oracle.jdbc.OracleDriver"
+    , "connectionString": "jdbc:oracle:thin:@#{myOracleHost}:#{myOraclePort}:#{myOracleDatabase}"
+    , "username": "#{myOracleUser}"
+    , "*password": "#{myOraclePassword}"
+    }
+  , { "id": "BackupTable"
+    , "name": "Back up Oracle table"
+    , "type": "CopyActivity"
+    , "input":
+      { "ref": "Oracle" }
+    , "output":
+      { "ref": "S3" }
+    , "runsOn":
+      { "ref": "Instance" }
+    , "schedule":
+      { "ref": "DefaultSchedule" }
+    }
+  , { "id": "Oracle"
+    , "name": "Oracle"
+    , "type": "SqlDataNode"
+    , "table": "#{myOracleTable}"
+    , "selectQuery": "SELECT * FROM mytable"
+    , "database":
+      { "ref": "OracleDatabase" }
+    , "runsOn":
+      { "ref": "Instance" }
+    , "schedule":
+      { "ref": "DefaultSchedule" }
+    }
+  ],
+  "parameters": []
+}
