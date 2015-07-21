@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project makes it easy to setup a pipeline that uses [Sqoop](http://sqoop.apache.org/) to move data to from a MySql database hosted in RDS to a Redshift database cluster. S3 is used to stage the data between the databases.
+This sample makes it easy to setup a pipeline that uses [Sqoop](http://sqoop.apache.org/) to move data to from a MySql database hosted in RDS to a Redshift database cluster. S3 is used to stage the data between the databases.
 
 The project provides scripts for setting up the resources for the pipeline, installing the [data set](http://aws.amazon.com/datasets/6468931156960467), and destroying the resources. The project also provides the [pipeline definition file](http://docs.aws.amazon.com/datapipeline/latest/DeveloperGuide/dp-writing-pipeline-definition.html) which is used to create the pipeline and the AWS CLI commands for creating and executing the pipeline. See the instructions below to get started.
 
@@ -12,7 +12,7 @@ The project provides scripts for setting up the resources for the pipeline, inst
 
 You must have the AWS CLI and default IAM roles setup in order to run the sample. Please see the [readme](https://github.com/awslabs/data-pipeline-samples) for the base repository for instructions how to do this.
 
-You must also provide a S3 bucket with write permissions. See [here](http://docs.aws.amazon.com/AmazonS3/latest/UG/CreatingaBucket.html) for instructions on how to create an S3 bucket.
+You must also provide the S3Path of a S3 bucket with write permissions. See [here](http://docs.aws.amazon.com/AmazonS3/latest/UG/CreatingaBucket.html) for instructions on how to create an S3 bucket.
 
 ## Step 1: Setup resources and data
 
@@ -40,7 +40,7 @@ $> chmod +x install.sh
 
   # now upload the pipeline definition 
 
-  $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/sqoop/sqoop.json --parameter-values myS3LogsPath="<your s3 logging path>"
+  $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/sqoop/sqoop.json --parameter-values myS3BucketPath=[s3://your/s3/bucket/path] myRDSID=[rds_id] myRSClusterID=[rs_cluster_id]
 
   # You receive a validation messages like this
 
@@ -72,7 +72,7 @@ $> chmod +x install.sh
 Run the following script to destroy the databases and the S3 bucket.
 
 ```
-$> ./teardown.sh
+$> ./teardown.sh [rds_id] [rs_cluster_id]
 ```
 
 *Note: Make sure the script has executable permissions*
