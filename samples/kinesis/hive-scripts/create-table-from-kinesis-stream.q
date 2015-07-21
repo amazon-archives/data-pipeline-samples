@@ -19,12 +19,16 @@ STORED BY
 'com.amazon.emr.kinesis.hive.KinesisStorageHandler'
 TBLPROPERTIES("kinesis.stream.name"="AccessLogStream");
 
-CREATE TABLE IF NOT EXISTS apachelog_s3 (os string, error_count int)
+CREATE TABLE IF NOT EXISTS apachelog_s3 (
+  host STRING,
+  IDENTITY STRING,
+  USER STRING,
+  TIME STRING,
+  request STRING,
+  STATUS STRING,
+  SIZE STRING,
+  referrer STRING,
+  agent STRING
+)
 PARTITIONED BY(iteration_no int)
-LOCATION 's3://<my-kinesis-bucket>';
-
-set kinesis.checkpoint.enabled=true;
-set kinesis.checkpoint.metastore.table.name=MyEMRKinesisTable;
-set kinesis.checkpoint.metastore.hash.key.name=HashKey;
-set kinesis.checkpoint.metastore.range.key.name=RangeKey;
-set kinesis.checkpoint.logical.name=TestLogicalName;
+LOCATION '${s3Location}';
