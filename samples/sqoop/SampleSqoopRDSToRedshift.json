@@ -1,7 +1,7 @@
 {
   "objects": [
     {
-      "connectionString": "#{myRedshiftJdbcConnectStr}",
+      "connectionString": "jdbc:postgresql://#{myRedshiftEndpoint}:5439/dev",
       "databaseName": "#{myRedshiftDbName}",
       "*password": "#{*myRedshiftPassword}",
       "name": "RedshiftCluster",
@@ -32,7 +32,9 @@
         "ref": "DefaultSchedule"
       },
       "name": "SqoopRDSToS3",
-      "step": "s3://elasticmapreduce/libs/script-runner/script-runner.jar,s3://data-pipeline-samples/sqoop-activity/run_sqoop_job.sh",
+      "step": [
+          "s3://elasticmapreduce/libs/script-runner/script-runner.jar,s3://data-pipeline-samples/sqoop-activity/run_sqoop_job.sh,import,#{myRdsEndpoint},millionsongs,songs,#{myS3StagingPath},dplcustomer,Dplcustomer1"
+      ],
       "runsOn": {
         "ref": "EmrClusterId_MxJAF"
       },
@@ -46,7 +48,6 @@
       },
       "resourceRole": "DataPipelineDefaultResourceRole",
       "role": "DataPipelineDefaultRole",
-      "pipelineLogUri": "s3://setl-user-dev-logs/logs/",
       "scheduleType": "cron",
       "name": "Default",
       "id": "Default"
@@ -90,7 +91,7 @@
       "insertMode": "TRUNCATE"
     },
     {
-      "directoryPath": "#{myInputS3Loc}",
+      "directoryPath": "#{myS3StagingPath}",
       "name": "S3InputDataNode",
       "id": "S3InputDataNode",
       "type": "S3DataNode"
@@ -138,7 +139,7 @@
     {
       "helpText": "The S3 folder where one or more input files are located.",
       "description": "Input S3 folder",
-      "id": "myInputS3Loc",
+      "id": "myStagingS3Path",
       "type": "AWS::S3::ObjectKey"
     },
     {
@@ -170,10 +171,8 @@
   "values": {
     "myRedshiftUsername": "dpluser1",
     "myRedshiftDbName": "dev",
-    "myRedshiftJdbcConnectStr": "jdbc:postgresql://dpl-sample-redshift.c3m4tjmvavo4.us-east-1.redshift.amazonaws.com:5439/dev",
     "*myRedshiftPassword": "dPLUSER1",
     "myRedshiftSecurityGrps": "default",
-    "myRedshiftTableName": "songs",
-    "myInputS3Loc": "s3://data-pipeline-samples/sqoop-activity/staging"
+    "myRedshiftTableName": "songs"
   }
 }

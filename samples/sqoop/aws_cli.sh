@@ -1,18 +1,15 @@
 #!/bin/bash
 
-cli_root=$1
-definition="file://`pwd`/SampleSqoopRDSToRedshift.json"
-if [ -d "$2" ]
-then
-    definition="file://`pwd`/$2"
-fi
-timestamp=`date +%m-%d-%Y-%T | sed "s/:/-/g"`
-region="us-east-1"
+rds_hostname=$1
+s3_staging_dir=$2
+redshift_hostname=$3
 
-$cli_root/bin/aws s3 rm s3://data-pipeline-samples/sqoop-activity/staging --recursive 
+timestamp=`date +%m-%d-%Y-%T | sed "s/:/-/g"`
+
+definition="sqoop.json"
 
 # Create a new Data Pipeline and save its ID
-pipelineId=`$cli_root/bin/aws datapipeline create-pipeline --region $region --name "Sqoop Sample Activity" --unique-id sqoop_sample_activity_$timestamp | grep pipelineId | cut -d: -f2 | sed "s/ //g" | sed "s/\"//g"`
+pipelineId=`aws datapipeline create-pipeline --name "Sqoop Sample Activity" --unique-id sqoop_sample_activity_$timestamp | grep pipelineId | cut -d: -f2 | sed "s/ //g" | sed "s/\"//g"`
 
 if [ "$pipelineId" = "" ]
 then
@@ -22,8 +19,9 @@ fi
 
 echo "Data Pipeline $pipelineId successfully created"
 
+definition_to_submit="file://`pwd`/$definition"
 # Add a pipeline definition to the new pipeline
-error=`$cli_root/bin/aws datapipeline put-pipeline-definition --pipeline-id $pipelineId --pipeline-definition $definition --region $region | grep errored | cut -d: -f2 | grep -o true`
+error=`aws datapipeline put-pipeline-definition --pipeline-id $pipelineId --pipeline-definition $definition_to_submit --parameter-values myRdsEndpoint="$rds_hostname" myRdsDatabase="millionsongs" myRdsTable="songs" myS3Input="s3://data-pipeline-samples/sqoop-activity/sqoop-sample-input.csv" myRdsDbUsername="dplcustomer" myRdsDbPassword="Dplcustomer1" | grep errored | cut -d: -f2 | grep -o true`
 
 if [ "$error" = "true" ]
 then
@@ -34,6 +32,6 @@ fi
 echo "Definition $definition has been successfully added to Pipeline $pipelineId"
 
 # Activate the pipeline
-$cli_root/bin/aws datapipeline activate-pipeline --pipeline-id $pipelineId --region $region
+aws datapipeline activate-pipeline --pipeline-id $pipelineId
 
 echo "Pipeline $pipelineId is now active."
