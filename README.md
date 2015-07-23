@@ -21,7 +21,7 @@ AWS Data Pipeline is a web service that you can use to automate the movement and
 ##Install the AWS CLI 
 Follow the instructions [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html) to install the AWS CLI
 
-##Create default IAM Roles
+##Create default IAM roles
 
 Use the setup_roles.sh command to get your default roles setup.
 
@@ -30,37 +30,53 @@ Use the setup_roles.sh command to get your default roles setup.
  $> setup/setup_roles.sh
 ```
 
-##Run one of the samples
+##Run the hello world sample
+
+###Step 1
+Create the pipelineId by calling the *aws data pipeline create-pipeline* command. We'll use this pipelineId to host the pipeline definition document and ultimately to run and monitor the pipeline. 
 
 ```sh
  $> aws datapipeline create-pipeline --name hello_world_pipeline --unique-id hello_world_pipeline 
+```
 
-# You receive a pipeline activity like this. 
+You will receive a pipelineId like this. 
+```sh
 #   -----------------------------------------
 #   |             CreatePipeline             |
 #   +-------------+--------------------------+
 #   |  pipelineId |  df-0554887H4KXKTY59MRJ  |
 #   +-------------+--------------------------+
+```
 
-#now upload the pipeline definition 
+###Step 2
+Upload the helloworld.json sample pipeline definition by calling the *aws datapipeline put-pipeline-definition* command. This will upload and validate your pipeline definition. 
 
+```sh
   $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/helloworld/helloworld.json --parameter-values myS3LogsPath="<your s3 logging path>"
+```
 
-# You receive a validation messages like this
-
+You will receive a validation messages like this
+```sh
 #   ----------------------- 
 #   |PutPipelineDefinition|
 #   +-----------+---------+
 #   |  errored  |  False  |
 #   +-----------+---------+
+```
+###Step 3
+Activate the pipeline by calling the *aws datapipeline activate-pipeline* command. This will cause the pipeline to start running on its defined schedule. 
 
-#now activate the pipeline
+```sh
   $> aws datapipeline activate-pipeline --pipeline-id df-0554887H4KXKTY59MRJ
+``
 
-
-#check the status of your pipeline 
-
+Check the status of your pipeline 
+```sh
   >$ aws datapipeline list-runs --pipeline-id df-0554887H4KXKTY59MRJ
+```
+
+You will receive status information on the pipeline.  
+```sh
 #          Name                                                Scheduled Start      Status
 #          ID                                                  Started              Ended
 #   ---------------------------------------------------------------------------------------------------
