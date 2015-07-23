@@ -24,6 +24,7 @@ AWS Data Pipeline is a web service that you can use to automate the movement and
 ```
 
 ##Run the hello world sample
+The hello world sample demonstrates a pipeline that creates an EC2 instance and runs `echo Hello World!`. It can be used as a reference template for executing arbitriy shell commands.  
 
 ###Step 1
 Create the pipelineId by calling the *aws data pipeline create-pipeline* command. We'll use this pipelineId to host the pipeline definition document and ultimately to run and monitor the pipeline. 
