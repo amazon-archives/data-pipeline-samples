@@ -107,9 +107,9 @@ Let's look at the Hello world example pipeline located at samples/helloworld/hel
       "myComment": "This object is used to specify the time-based trigger for executing 
       Activities and for provisioning Resources of the pipeline. In this case it is used 
       by the 'Default' object so it will cascade down to all other objects in the pipeline 
-      if they do not override it. For this example, we are using it to specify that our 
-      pipeline will run immediately upon activation. Also, we are using the 'occurrences' 
-      option specify that the pipeline should only be run once. You can have multiple 
+      if they do not override it. For this example, we use it to specify that our pipeline 
+      should execute immediately upon activation. Also, we are using the 'occurrences' 
+      option to specify that the pipeline should be run only once. Note: You can have multiple 
       schedules defined in a pipeline.",
 
       "type": "Schedule",
@@ -121,8 +121,8 @@ Let's look at the Hello world example pipeline located at samples/helloworld/hel
 
 
     { 
-      "myComment": "This object is used to create an Amazon EC2 Instance that activities 
-      in the pipeline can run on.",
+      "myComment": "This object is used to create the Amazon EC2 Instance that activities 
+      in the pipeline will be executed on.",
 
       "id": "A_Fresh_NewEC2Instance",
       "type": "Ec2Resource",
@@ -131,8 +131,8 @@ Let's look at the Hello world example pipeline located at samples/helloworld/hel
     {
      "myComment": "This object is a ShellCommandActivity. It is used to specify the linux 
      shell command that will be invoked. In this case it is simply running the 'echo' command, 
-     but it can be used to run any command that is accessible on the in the shell of the 
-     Resource that runs on.",
+     but it can be used to run any command that is accessible on in the commandline shell of the 
+     Instance that runs on.",
 
       "id": "ShellCommandActivity_HelloWorld",
       "runsOn": {
@@ -144,11 +144,13 @@ Let's look at the Hello world example pipeline located at samples/helloworld/hel
   ],
 "parameters": [
      {
-        "myComment": "This Parameter specifies the S3 logging path for the pipeline. It is 
-        used by the 'Default' object to set the 'pipelineLogUri' value. Using Parameters 
-        helps users avoid hard coding variables in pipeline definitions. Users can instead 
-        supply these parameters when calling 'aws datapipeline put-pipeline-definition' or 
-        'aws datapipeline activate-pipeline-definition'.",
+        "myComment": "Pipeline Parameters are placeholders for variables that a user can specify 
+        when uploading or activating the pipeline. In this example, we create a Parameter 
+        called 'myS3LogsPath' which is used to provide an S3 location for output logs. It is 
+        referenced above in the 'Default' object to set the 'pipelineLogUri' value. Parameters 
+        help users avoid hard coding variables in pipeline definitions. Users can supply these 
+        parameters when calling 'aws datapipeline put-pipeline-definition' or 'aws datapipeline
+        activate-pipeline-definition'.",
 
         "id" : "myS3LogsPath",
         "type" : "AWS::S3::ObjectKey",
