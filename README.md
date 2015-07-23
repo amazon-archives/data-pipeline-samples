@@ -99,7 +99,12 @@ You will receive status information on the pipeline.
       }
    },
    {
-      "myComment": "This object is used to specify the time-based trigger for executing Activities and for provisioning Resources of the pipeline. In this case it is used by the 'Default' object so it will cascade down to all other objects in the pipeline if they do not override it. For this example, we are using it to specify that our pipeline will run immediately upon activation. Also, we are using the 'occurrences' option specify that the pipeline should only be run once. You can have multiple schedules defined in a pipeline.",
+      "myComment": "This object is used to specify the time-based trigger for executing Activities 
+      and for provisioning Resources of the pipeline. In this case it is used by the 'Default' object 
+      so it will cascade down to all other objects in the pipeline if they do not override it. For this 
+      example, we are using it to specify that our pipeline will run immediately upon activation. Also, 
+      we are using the 'occurrences' option specify that the pipeline should only be run once. You can 
+      have multiple schedules defined in a pipeline.",
 
       "type": "Schedule",
       "id": "DefaultSchedule",
@@ -110,14 +115,17 @@ You will receive status information on the pipeline.
 
 
     { 
-      "myComment": "This object is used to create an Amazon EC2 Instance that activities in the pipeline can run on.",
+      "myComment": "This object is used to create an Amazon EC2 Instance that activities in the pipeline 
+      can run on.",
 
       "id": "A_Fresh_NewEC2Instance",
       "type": "Ec2Resource",
       "terminateAfter": "1 Hour"
     },
     {
-     "myComment": "This object is a ShellCommandActivity. It is used to specify the command linux shell command that will be invoked. In this case it is simply running the 'echo' command, but it can be used to run any command that is accessible on the in the shell of the Resource that runs on.",
+     "myComment": "This object is a ShellCommandActivity. It is used to specify the linux shell command 
+     that will be invoked. In this case it is simply running the 'echo' command, but it can be used to 
+     run any command that is accessible on the in the shell of the Resource that runs on.",
 
       "id": "ShellCommandActivity_HelloWorld",
       "runsOn": {
@@ -129,7 +137,10 @@ You will receive status information on the pipeline.
   ],
 "parameters": [
      {
-        "myComment": "This Parameter specifies the S3 logging path for the pipeline. It is used by the 'Default' object to set the 'pipelineLogUri' value. Using Parameters helps users avoid hard coding variables in pipeline definitions. Users can instead supply these parameters when calling 'aws datapipeline put-pipeline-definition' or 'aws datapipeline activate-pipeline-definition'.",
+        "myComment": "This Parameter specifies the S3 logging path for the pipeline. It is used by the 
+        'Default' object to set the 'pipelineLogUri' value. Using Parameters helps users avoid hard coding 
+        variables in pipeline definitions. Users can instead supply these parameters when calling 'aws 
+        datapipeline put-pipeline-definition' or 'aws datapipeline activate-pipeline-definition'.",
 
         "id" : "myS3LogsPath",
         "type" : "AWS::S3::ObjectKey",
