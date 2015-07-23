@@ -11,18 +11,15 @@ AWS Data Pipeline is a web service that you can use to automate the movement and
 
 
 # Running the samples
-Get the samples by cloning this repository. 
-
+##Setup
+1.Get the samples by cloning this repository. 
 ```sh
  $> git clone https://github.com/awslabs/data-pipeline-samples.git
 ```
 
-Install and configure the AWS CLI by follow the instructions [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html) to install the AWS CLI
+2.Install and configure the AWS CLI by follow the instructions [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html) to install the AWS CLI
 
-Create default IAM roles
-
-Use the setup_roles.sh command to get your default roles setup.
-
+3.Create AWS IAM roles to run the samples using the setup_roles.sh script.
 ```sh
  $> chmod 755 setup/setup_roles.sh
  $> setup/setup_roles.sh
@@ -85,7 +82,7 @@ You will receive status information on the pipeline.
 #          @ShellCommandActivity_HelloWorld_2015-07-19T22:48:  2015-07-19T22:48:34
 
 ```
-
+##Examine the contents of the samples/helloworld/helloworld.json file to understand what's going on. 
 
 ##Disclaimer
 The samples in this repository are meant to help users get started with Data Pipeline. They may not be sufficient for production environments. Users should carefully inspect code samples before running them.
