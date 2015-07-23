@@ -46,7 +46,9 @@ You will receive a pipelineId like this.
 Upload the helloworld.json sample pipeline definition by calling the *aws datapipeline put-pipeline-definition* command. This will upload and validate your pipeline definition. 
 
 ```sh
-  $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/helloworld/helloworld.json --parameter-values myS3LogsPath="<your s3 logging path>"
+  $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ \
+  --pipeline-definition file://samples/helloworld/helloworld.json \
+  --parameter-values myS3LogsPath="<your s3 logging path>"
 ```
 
 You will receive a validation messages like this
@@ -81,13 +83,15 @@ You will receive status information on the pipeline.
 #          @ShellCommandActivity_HelloWorld_2015-07-19T22:48:  2015-07-19T22:48:34
 
 ```
-##Examine the contents of the samples/helloworld/helloworld.json file to understand what's going on. 
+##Examine the contents of the sample pipeline definition 
+Let's look at the Hello world example pipeline located at samples/helloworld/helloworld.json. 
 
 ```json
 {
   "objects": [
   { 
-      "myComment": "This object is used to set default configuration for objects in the pipeline",
+      "myComment": "This object is used to set default configuration for objects 
+      in the pipeline",
       
       "id": "Default",
       "failureAndRerunMode":"cascade",
@@ -154,19 +158,16 @@ You will receive status information on the pipeline.
 }
 ```
 
+##Check out the other samples
+This reposity contains a collection of Data Pipeline templates that should help you get started quickly. Browse the content of the /samples folder to discover what samples exist. Also, feel free to submit samples a pull requests.  
 
-Check out the other samples in this reposity to find helpful getting started templates. 
+
+
 
 ##Disclaimer
 The samples in this repository are meant to help users get started with Data Pipeline. They may not be sufficient for production environments. Users should carefully inspect samples before running them.
 
 _Use at your own risk._
 
-Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-
-Licensed under the Amazon Software License (the "License"). You
-may not use this file except in compliance with the License. A copy of
-the License is located at
-
-http://aws.amazon.com/asl/
+Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved. Licensed under the [Amazon Software License](http://aws.amazon.com/asl/).
 
