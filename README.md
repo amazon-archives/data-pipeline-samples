@@ -23,7 +23,7 @@ AWS Data Pipeline is a web service that you can use to automate the movement and
  $> setup/setup_roles.sh
 ```
 
-##Run the hello world sample
+##Run the Hello World sample
 The hello world sample demonstrates a pipeline that creates an EC2 instance and runs `echo Hello World!`. It can be used as a reference template for executing arbitriy shell commands.  
 
 ###Step 1
