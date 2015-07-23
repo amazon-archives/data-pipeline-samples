@@ -8,8 +8,6 @@ Data Pipeline Samples
 AWS Data Pipeline is a web service that you can use to automate the movement and transformation of data. With AWS Data Pipeline, you can define data-driven workflows, so that tasks can be dependent on the successful completion of previous tasks. You define the parameters of your data transformations and AWS Data Pipeline enforces the logic that you've set up.
 
 
-
-
 # Running the samples
 ##Setup
 1. Get the samples by cloning this repository. 
@@ -84,8 +82,10 @@ You will receive status information on the pipeline.
 ```
 ##Examine the contents of the samples/helloworld/helloworld.json file to understand what's going on. 
 
+Check out the other samples in this reposity to find helpful getting started templates. 
+
 ##Disclaimer
-The samples in this repository are meant to help users get started with Data Pipeline. They may not be sufficient for production environments. Users should carefully inspect code samples before running them.
+The samples in this repository are meant to help users get started with Data Pipeline. They may not be sufficient for production environments. Users should carefully inspect samples before running them.
 
 _Use at your own risk._
 
