@@ -17,13 +17,17 @@ You must also provide the S3Path of a S3 bucket with write permissions. See [her
 ## Step 1: Setup resources and data
 
 The following script to set-up the databases and source data in your AWS account.
+
+The script takes an *optional* parameter for an S3 path for staging data between RDS and Redshift. If you choose to provide your own S3 path, the bucket must be in the same region as what is set for your AWS CLI configuration.
+
+If the path is not provided, the script will create the S3 bucket for you.
 ```
-$> ./install.sh
+$> ./setup.sh [s3://optional/path/to/s3/bucket]
 ```
 *Note: Make sure the script has executable permissions*
 
 ```
-$> chmod +x install.sh
+$> chmod +x setup.sh
 ```
 
 ## Step 2: Run the pipeline using AWS CLI commands
