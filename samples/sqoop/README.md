@@ -16,7 +16,7 @@ You must also provide the S3Path of a S3 bucket with write permissions. See [her
 
 ## Step 1: Setup resources and data
 
-The following script to set-up the databases and source data in your AWS account.
+Run the following script to set-up the databases and source data in your AWS account.
 
 The script takes an *optional* parameter for an S3 path for staging data between RDS and Redshift. If you choose to provide your own S3 path, the bucket must be in the same region as what is set for your AWS CLI configuration.
 
@@ -33,7 +33,7 @@ $> chmod +x setup.sh
 ## Step 2: Run the pipeline using AWS CLI commands
 
   ```
-  $> aws datapipeline create-pipeline --name sqoop_pipeline --unique-id [unique_id]
+  $> aws datapipeline create-pipeline --name sqoop_pipeline --unique-id <unique_id>
 
   # You receive a pipeline activity like this. 
   #   -----------------------------------------
@@ -44,7 +44,7 @@ $> chmod +x setup.sh
 
   # now upload the pipeline definition 
 
-  $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/sqoop/sqoop.json --parameter-values myS3BucketPath=[s3://your/s3/bucket/path] myRDSID=[rds_id] myRSClusterID=[rs_cluster_id]
+  $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/sqoop/sqoop.json --parameter-values myS3StagingPath=<s3://your/s3/bucket/path> myRedshiftEndpoint=<redshift_endpoint> myRDSEndpoint=<rds_endpoint>
 
   # You receive a validation messages like this
 
@@ -73,10 +73,10 @@ $> chmod +x setup.sh
 
 ## Step 3: Tear down 
 
-Run the following script to destroy the databases and the S3 bucket.
+Run the following script to destroy the databases and optionally the S3 bucket (only if it was created by setup.sh).
 
 ```
-$> ./teardown.sh [rds_id] [rs_cluster_id]
+$> ./teardown.sh <rds_id> <rs_cluster_id> [s3://optional/path/to/s3/bucket/created/by/setup]
 ```
 
 *Note: Make sure the script has executable permissions*
