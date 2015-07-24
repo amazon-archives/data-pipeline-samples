@@ -24,7 +24,7 @@ If the path is not provided, the script will create the S3 bucket for you.
 ```
 $> ./setup.sh [s3://optional/path/to/s3/bucket]
 ```
-*Note: Make sure the script has executable permissions*
+*Note: Make sure the script has executable permissions.*
 
 ```
 $> chmod +x setup.sh
