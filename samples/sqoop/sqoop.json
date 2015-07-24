@@ -1,15 +1,19 @@
 {
   "objects": [
     {
+      "myComment": "This object provides connection information for the Redshift cluster.",
+
       "connectionString": "jdbc:postgresql://#{myRedshiftEndpoint}:5439/dev",
       "databaseName": "dev",
-      "password": "Dplcustomer1",
+      "*password": "Dplcustomer1",
       "name": "RedshiftCluster",
       "id": "RedshiftCluster",
       "type": "RedshiftDatabase",
       "username": "dplcustomer"
     },
     {
+      "myComment": "This object is used to control the task schedule.",
+
       "occurrences": "1",
       "period": "1 Day",
       "name": "RunOnce",
@@ -18,6 +22,8 @@
       "startAt": "FIRST_ACTIVATION_DATE_TIME"
     },
     {
+      "myComment": "This object is used to provide information for the EMR cluster bootstrap",
+
       "bootstrapAction": "s3://data-pipeline-samples/sqoop-activity/install_sqoop_ba.sh",
       "schedule": {
         "ref": "DefaultSchedule"
@@ -28,6 +34,8 @@
       "type": "EmrCluster"
     },
     {
+      "myComment": "This object is used to run the Sqoop activity that extracts data from RDS.",
+
       "schedule": {
         "ref": "DefaultSchedule"
       },
@@ -42,6 +50,8 @@
       "type": "EmrActivity"
     },
     {
+      "myComment": "This object is used to set default configuration for objects in the pipeline.",
+
       "failureAndRerunMode": "CASCADE",
       "schedule": {
         "ref": "DefaultSchedule"
@@ -53,6 +63,8 @@
       "id": "Default"
     },
     {
+      "myComment": "This object controls the host type for Redshift.",
+
       "instanceType": "t1.micro",
       "name": "Ec2Instance",
       "securityGroups": "#{myRedshiftSecurityGrps}",
@@ -61,17 +73,21 @@
       "terminateAfter": "2 Hours"
     },
     {
+      "myComment": "This object contains information about the Redshift database.",
+
       "database": {
         "ref": "RedshiftCluster"
       },
-      "createTableSql": "#{myRedshiftCreateTableSql}",
+      "createTableSql": "create table songs(track_id varchar(2048) not null distkey sortkey, title varchar(2048), song_id varchar(2048), release_name varchar(2048), artist_id varchar(2048), artist_mbid varchar(2048), artist_name varchar(2048), duration float, artist_familiarity float, artist_hotness float, year int);",
       "primaryKeys": "#{myPrimaryKeys}",
       "name": "DestRedshiftTable",
       "id": "DestRedshiftTable",
       "type": "RedshiftDataNode",
-      "tableName": "#{myRedshiftTableName}"
+      "tableName": "songs"
     },
     {
+      "myComment": "This object is used to specify the copy activity for moving data from S3 to Redshift.",
+
       "output": {
         "ref": "DestRedshiftTable"
       },
@@ -91,6 +107,8 @@
       "insertMode": "TRUNCATE"
     },
     {
+      "myComment": "This object provides information on the S3 staging data.",
+
       "directoryPath": "#{myS3StagingPath}",
       "name": "S3InputDataNode",
       "id": "S3InputDataNode",
@@ -99,6 +117,8 @@
   ],
   "parameters": [
     {
+      "myComment": "This parameter specifies the default security group for the Redshift cluster.",
+
       "default": "default",
       "watermark": "security group name",
       "helpText": "The names of one or more security groups that are assigned to the Redshift cluster.",
@@ -108,26 +128,16 @@
       "type": "String"
     },
     {
-      "watermark": "CREATE TABLE IF NOT EXISTS #{tableName} (id varchar(255), name varchar(255), address varchar(255), primary key(id)) distkey(id) sortkey(id);",
-      "helpText": "The SQL statement to create the Redshift table if it does not already exist.",
-      "description": "Create table SQL query",
-      "optional": "true",
-      "id": "myRedshiftCreateTableSql",
-      "type": "String"
-    },
-    {
+      "myComment": "This parameter specifies the S3 staging directory where Sqoop will place data extracted from RDS and the RedshiftCopyActivity will look to load data into Redshift.",
+
       "helpText": "The S3 folder where one or more input files are located.",
       "description": "Input S3 folder",
-      "id": "myStagingS3Path",
+      "id": "myS3StagingPath",
       "type": "AWS::S3::ObjectKey"
     },
     {
-      "watermark": "jdbc:postgresql://endpoint:port/database?tcpKeepAlive=true",
-      "description": "Redshift JDBC connection string",
-      "id": "myRedshiftJdbcConnectStr",
-      "type": "String"
-    },
-    {
+      "myComment": "This parameter specifies options to the Redshift copy command.",
+
       "helpLink": "https://docs.aws.amazon.com/console/datapipeline/redshiftcopyactivity",
       "watermark": "IGNOREHEADER AS 1",
       "helpText": "COPY parameters to pass to Redshift",
@@ -138,6 +148,8 @@
       "type": "String"
     },
     {
+      "myComment": "This parameter specifies the primary keys in the Redshift table.",
+
       "helpLink": "https://docs.aws.amazon.com/console/datapipeline/dp_object_redshiftdatanode",
       "helpText": "The names of all primary key columns in the Redshift table used to merge existing data with new data.",
       "description": "Primary keys",

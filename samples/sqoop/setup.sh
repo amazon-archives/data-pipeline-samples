@@ -1,17 +1,54 @@
 #!/bin/bash
 
+# We need the AWS account ID to create an RDS DB instance
 aws_account_id=`aws iam get-user | grep UserId | cut -d: -f2 | sed "s/ //g" | \
 sed "s/\"//g" | sed "s/,//g"`
 
-echo "Using AWS account $aws_account_id"
+# echo "Using AWS account $aws_account_id"
 
-if ! [ -d $1 ]
+s3_staging_path=
+use_customer_s3="false"
+customer_location=`cat ~/.aws/config | grep region | cut -d= -f2 | sed "s/ //g"`
+if [ -z "$1" ]
 then
-    echo "Please provide an S3 folder for staging data between RDS and Redshift."
-    echo "You must have read AND write access to this folder."
-    exit 1
+    echo "No S3 staging path given so we will create a temporary staging folder for you."
+    timestamp=`date +"%m.%d.%Y.%T" | sed "s/\:/./g"`
+    s3_staging_bucket="sqoop.sample."`cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1 | tr [:upper:] [:lower:]`".$timestamp"
+    s3_staging_path="s3://$s3_staging_bucket/staging"
+    # Ensure the temp bucket is created in the same region as where Redshift will be created.
+    if [ "$customer_location" = "us-east-1" ]; then
+        aws s3api create-bucket --bucket $s3_staging_bucket
+    else
+        aws s3api create-bucket --bucket $s3_staging_bucket --create-bucket-configuration LocationConstraint="$customer_location"
+    fi
+else
+    # First, make sure the S3 path is in the same region as Redshift.
+    # Otherwise, Redshift won't be able to read data from S3.
+    s3_staging_path=$1
+    schema=`echo $s3_staging_path | grep -o -e "^s3://"`
+    if [ "$schema" != "s3://" ]; then
+        echo "Please provide a valid s3 path starting with s3://<bucket>/<prefix>."
+        exit 1
+    fi
+    s3_staging_bucket=`echo $s3_staging_path | sed "s/s3:\/\///g" | cut -d/ -f1`
+    s3_location=`aws s3api get-bucket-location --bucket $s3_staging_bucket | grep LocationConstraint | cut -d: -f2 | sed "s/ //g" | sed "s/\"//g"`
+    if [ "$s3_location" = "$customer_location" ]; then
+        echo "Valid S3 path"
+    elif [ "$s3_location" = "null" ] && [ "$customer_location" = "us-east-1" ]; then
+        echo "Valid S3 path"
+    else 
+        echo "You must use an S3 bucket which was created in the same region as the one used by your AWS CLI ($customer_location)."
+        echo "$s3_staging_bucket is in $s3_location."
+    fi
+    # Make sure the path does not yet exist (Sqoop will create it)
+    res=`aws s3 ls $s3_staging_path`
+    if [ "$res" != "" ]; then
+        echo "$s3_staging_path already exists! Please provide a new S3 path."
+        exit 1
+    fi 
+    use_customer_s3="true"    
 fi
-s3_staging_dir=$1
+
 db_security_group="aws_data_pipeline_sqoop_sample_security_group"
 
 DBID="RDS"`cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1`
@@ -84,7 +121,8 @@ fi
 
 echo "Data Pipeline $pipelineId successfully created"
 # Put definition
-error=`aws datapipeline put-pipeline-definition --pipeline-id $pipelineId --pipeline-definition file://`pwd`/setup.json --parameter-values myRdsEndpoint="$rds_hostname" myRdsDatabase="millionsongs" myRdsTable="songs" myS3Input="s3://data-pipeline-samples/sqoop-activity/sqoop-sample-input.csv" myRdsDbUsername="dplcustomer" myRdsDbPassword="Dplcustomer1" myRdsTableCreate="create table songs (track_id varchar(512) primary key not null, title text, song_id text, release_name text, artist_id text, artist_mbid text, artist_name text, duration float, artist_familiarity float, artist_hotness float, year integer)"`
+setup_definition="file://`pwd`/setup.json"
+error=`aws datapipeline put-pipeline-definition --pipeline-id $pipelineId --pipeline-definition $setup_definition --parameter-values myRdsEndpoint="$rds_hostname" myRdsDatabase="millionsongs" myRdsTable="songs" myS3Input="s3://data-pipeline-samples/sqoop-activity/sqoop-sample-input.csv" myRdsDbUsername="dplcustomer" myRdsDbPassword="Dplcustomer1" myRdsTableCreate="create table songs (track_id varchar(512) primary key not null, title text, song_id text, release_name text, artist_id text, artist_mbid text, artist_name text, duration float, artist_familiarity float, artist_hotness float, year integer)"`
 
 if [ "$error" = "true" ]
 then
@@ -104,8 +142,42 @@ while true; do
    state=`aws datapipeline describe-pipelines --pipeline-id $pipelineId | grep -B 1 @pipelineState | grep -o FINISHED`
    if [ "$state" = "FINISHED" ]
    then
+      echo "Pipeline $pipelineId is now completed."
       break;
    fi
    echo "Waiting for all resources to be available ..."
    sleep 30
 done
+
+echo ""
+echo "Set-up complete! You are now ready to proceed with the Sqoop Sample."
+echo "Please refer to the sample README for instructions on how to run this sample."
+echo "**************************************************"
+echo "*               Resource Summary                 *"
+echo "**************************************************"
+if [ "$use_customer_s3" = "true" ]; then
+cat <<EOF | column -t -s, 
+Resource,Instance ID,Instance endpoint
+========,===========,=================
+RDS,$DBID,$rds_hostname
+Redshift,$CLUSTERID,$redshift_hostname
+EOF
+else
+cat <<EOF | column -t -s, 
+Resource,Instance ID,Instance endpoint
+========,===========,=================
+RDS,$DBID,$rds_hostname
+Redshift,$CLUSTERID,$redshift_hostname
+S3,$s3_staging_bucket,$s3_staging_path
+EOF
+fi
+echo ""
+echo "You can copy and paste the following line to add the sample definition to your pipeline once it is created (Step 2)"
+echo "> aws datapipeline put-pipeline-definition --pipeline-id <pipeline_id> --pipeline-definition file://`pwd`/sqoop.json --parameter-values myRdsEndpoint=\"$rds_hostname\" myRedshiftEndpoint=\"$redshift_hostname\" myS3StagingPath=\"<S3_staging_path>\""
+echo ""
+echo "If you wish to delete all the resources created for this sample, please run the teardown script as follows"
+if [ "$use_customer_s3" = "true" ]; then
+    echo "> ./teardown.sh $DBID $CLUSTERID"
+else
+    echo "> ./teardown.sh $DBID $CLUSTERID $s3_staging_path"
+fi
