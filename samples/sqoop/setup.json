@@ -1,0 +1,83 @@
+{
+  "objects": [
+    {
+      "occurrences": "1",
+      "period": "1 Day",
+      "name": "RunOnce",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "s3://data-pipeline-samples/sqoop-activity",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "name": "SqoopActivity",
+      "step": [
+               "s3://elasticmapreduce/libs/script-runner/script-runner.jar,s3://data-pipeline-samples/sqoop-activity/mysql_create_table.sh,#{myRdsEndpoint},#{myRdsDatabase},#{myRdsDbUsername},#{myRdsDbPassword}",
+               "s3://elasticmapreduce/libs/script-runner/script-runner.jar,s3://data-pipeline-samples/sqoop-activity/run_sqoop_job.sh,export,#{myRdsEndpoint},#{myRdsDatabase},#{myRdsTable},#{myS3Input},#{myRdsDbUsername},#{myRdsDbPassword}"               
+      ],
+      "runsOn": {
+        "ref": "EmrClusterId_itsxt"
+      },
+      "id": "ActivityId_6vvjv",
+      "type": "EmrActivity"
+    },
+    {
+      "bootstrapAction": "s3://data-pipeline-samples/sqoop-activity/install_sqoop_ba.sh",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "maximumRetries": "0",
+      "name": "DefaultEmrCluster1",
+      "id": "EmrClusterId_itsxt",
+      "amiVersion": "3.8.0",
+      "masterInstanceType": "m3.xlarge",
+      "type": "EmrCluster",
+      "terminateAfter": "1 Day"
+    }
+  ],
+  "parameters": [
+    {
+      "description": "RDS hostname",
+      "id": "myRdsEndpoint",
+      "type": "String"
+    },
+    {
+      "description": "RDS database",
+      "id": "myRdsDatabase",
+      "type": "String"
+    },
+    {
+      "description": "RDS table",
+      "id": "myRdsTable",
+      "type": "String"
+    },
+    {
+      "description": "S3 input key",
+      "id": "myS3Input",
+      "type": "AWS::S3::ObjectKey"
+    },
+    { 
+      "description": "RDS database username",
+      "id": "myRdsDbUsername",
+      "type": "String"
+    },
+    { 
+      "description": "RDS database password",
+      "id": "myRdsDbPassword",
+      "type": "String"
+    }
+  ]
+}
