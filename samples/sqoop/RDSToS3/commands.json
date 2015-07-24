@@ -1,9 +1,0 @@
-ssh -i keypair.pwm user@ip
-
-psql -h  -p 5439 -U  -d
-
-create table songs(track_id varchar(2048) not null distkey sortkey, title varchar(2048), song_id varchar(2048), release_name varchar(2048), artist_id varchar(2048), artist_mbid varchar(2048), artist_name varchar(2048), duration float, artist_familiarity float, artist_hotness float, year int);
-
-
-
-copy songs (track_id, title, song_id, release_name, artist_id, artist_mbid, artist_name, duration, artist_familiarity, artist_hotness, year) from 's3://data-pipeline-samples/sqoop-activity/test-data/part-m-00005 (3)' CREDENTIALS 'aws_access_key_id=aws_secret_access_key=' DELIMITER ',';
