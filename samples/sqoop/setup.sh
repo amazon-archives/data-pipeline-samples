@@ -12,8 +12,8 @@ customer_location=`cat ~/.aws/config | grep region | cut -d= -f2 | sed "s/ //g"`
 if [ -z "$1" ]
 then
     echo "No S3 staging path given so we will create a temporary staging folder for you."
-    timestamp=`date +"%m.%d.%Y.%T" | sed "s/\:/./g"`
-    s3_staging_bucket="sqoop.sample."`cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1 | tr [:upper:] [:lower:]`".$timestamp"
+    tmp_s3_staging_bucket="sqoop.sample."`cat /dev/urandom | env LC_CTYPE=C tr -dc 'a-zA-Z0-9' | fold -w 16 | head -n 1 | tr [:upper:] [:lower:]`
+    s3_staging_bucket=`echo $tmp_s3_staging_bucket | sed "s/\./-/g"`
     s3_staging_path="s3://$s3_staging_bucket/staging"
     # Ensure the temp bucket is created in the same region as where Redshift will be created.
     if [ "$customer_location" = "us-east-1" ]; then
@@ -173,7 +173,11 @@ EOF
 fi
 echo ""
 echo "You can copy and paste the following line to add the sample definition to your pipeline once it is created (Step 2)"
+if [ "$use_customer_s3" = "true" ]; then
 echo "> aws datapipeline put-pipeline-definition --pipeline-id <pipeline_id> --pipeline-definition file://`pwd`/sqoop.json --parameter-values myRdsEndpoint=\"$rds_hostname\" myRedshiftEndpoint=\"$redshift_hostname\" myS3StagingPath=\"<S3_staging_path>\""
+else
+echo "> aws datapipeline put-pipeline-definition --pipeline-id <pipeline_id> --pipeline-definition file://`pwd`/sqoop.json --parameter-values myRdsEndpoint=\"$rds_hostname\" myRedshiftEndpoint=\"$redshift_hostname\" myS3StagingPath=\"$s3_staging_path\""
+fi
 echo ""
 echo "If you wish to delete all the resources created for this sample, please run the teardown script as follows"
 if [ "$use_customer_s3" = "true" ]; then
