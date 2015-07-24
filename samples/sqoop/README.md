@@ -75,8 +75,10 @@ $> chmod +x setup.sh
 
 Run the following script to destroy the databases and optionally the S3 bucket (only if it was created by setup.sh).
 
+*Note: The setup script will provide the teardown command with parameters at end of the execution*
+
 ```
-$> ./teardown.sh <rds_id> <rs_cluster_id> [s3://optional/path/to/s3/bucket/created/by/setup]
+$> ./teardown.sh <rds_instance_id> <redshift_cluster_id> [s3://optional/path/to/s3/bucket/created/by/setup]
 ```
 
 *Note: Make sure the script has executable permissions*
