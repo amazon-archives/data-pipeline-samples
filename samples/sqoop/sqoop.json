@@ -89,7 +89,6 @@
       },
       "resourceRole": "DataPipelineDefaultResourceRole",
       "role": "DataPipelineDefaultRole",
-      "pipelineLogUri": "s3://auslee-dpl-dev-us-standard/logs",
       "scheduleType": "cron",
       "name": "Default",
       "id": "Default"
