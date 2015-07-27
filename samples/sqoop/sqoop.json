@@ -1,19 +1,39 @@
 {
   "objects": [
     {
-      "myComment": "This object provides connection information for the Redshift cluster.",
-
-      "connectionString": "jdbc:postgresql://#{myRedshiftEndpoint}:5439/dev",
-      "databaseName": "dev",
-      "*password": "Dplcustomer1",
-      "name": "RedshiftCluster",
-      "id": "RedshiftCluster",
-      "type": "RedshiftDatabase",
-      "username": "dplcustomer"
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "name": "Sqoop",
+      "id": "ActivityId_wQhxe",
+      "runsOn": {
+        "ref": "ResourceId_z9RNH"
+      },
+      "type": "ShellCommandActivity",
+      "command": "/usr/bin/sqoop import --connect jdbc:mysql://#{myRdsEndpoint}/millionsongs --table songs --target-dir #{myS3StagingPath} --username dplcustomer --password Dplcustomer1"
     },
     {
-      "myComment": "This object is used to control the task schedule.",
-
+      "output": {
+        "ref": "DataNodeId_7EqZ7"
+      },
+      "input": {
+        "ref": "DataNodeId_ImmS9"
+      },
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "dependsOn": {
+        "ref": "ActivityId_wQhxe"
+      },
+      "name": "CopyToRedshift",
+      "id": "ActivityId_6OGtu",
+      "runsOn": {
+        "ref": "ResourceId_z9RNH"
+      },
+      "type": "RedshiftCopyActivity",
+      "insertMode": "TRUNCATE"
+    },
+    {
       "occurrences": "1",
       "period": "1 Day",
       "name": "RunOnce",
@@ -22,141 +42,58 @@
       "startAt": "FIRST_ACTIVATION_DATE_TIME"
     },
     {
-      "myComment": "This object is used to provide information for the EMR cluster bootstrap",
-
+      "connectionString": "jdbc:postgresql://#{myRedshiftEndpoint}:5439/dev",
+      "*password": "Dplcustomer1",
+      "name": "DefaultRedshiftDatabase1",
+      "id": "RedshiftDatabaseId_S34X5",
+      "type": "RedshiftDatabase",
+      "username": "dplcustomer"
+    },
+    {
       "bootstrapAction": "s3://data-pipeline-samples/sqoop-activity/install_sqoop_ba.sh",
       "schedule": {
         "ref": "DefaultSchedule"
       },
-      "name": "DefaultEmrCluster1",
-      "id": "EmrClusterId_MxJAF",
+      "name": "HadoopCluster",
+      "id": "ResourceId_z9RNH",
       "amiVersion": "3.8.0",
       "type": "EmrCluster"
     },
     {
-      "myComment": "This object is used to run the Sqoop activity that extracts data from RDS.",
-
       "schedule": {
         "ref": "DefaultSchedule"
       },
-      "name": "SqoopRDSToS3",
-      "step": [
-          "s3://elasticmapreduce/libs/script-runner/script-runner.jar,s3://data-pipeline-samples/sqoop-activity/run_sqoop_job.sh,import,#{myRdsEndpoint},millionsongs,songs,#{myS3StagingPath},dplcustomer,Dplcustomer1"
-      ],
-      "runsOn": {
-        "ref": "EmrClusterId_MxJAF"
-      },
-      "id": "ActivityId_TQ7lW",
-      "type": "EmrActivity"
+      "directoryPath": "#{myS3StagingPath}",
+      "name": "S3Input",
+      "id": "DataNodeId_ImmS9",
+      "type": "S3DataNode"
     },
     {
-      "myComment": "This object is used to set default configuration for objects in the pipeline.",
-
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "createTableSql": "create table IF NOT EXISTS songs (track_id varchar(2048) not null distkey sortkey, title varchar(2048), song_id varchar(2048), release_name varchar(2048), artist_id varchar(2048), artist_mbid varchar(2048), artist_name varchar(2048), duration float, artist_familiarity float, artist_hotness float, year int);",
+      "database": {
+        "ref": "RedshiftDatabaseId_S34X5"
+      },
+      "primaryKeys": "track_id",
+      "name": "Redshift",
+      "id": "DataNodeId_7EqZ7",
+      "type": "RedshiftDataNode",
+      "tableName": "songs"
+    },
+    {
       "failureAndRerunMode": "CASCADE",
       "schedule": {
         "ref": "DefaultSchedule"
       },
       "resourceRole": "DataPipelineDefaultResourceRole",
       "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "s3://auslee-dpl-dev-us-standard/logs",
       "scheduleType": "cron",
       "name": "Default",
       "id": "Default"
-    },
-    {
-      "myComment": "This object controls the host type for Redshift.",
-
-      "instanceType": "t1.micro",
-      "name": "Ec2Instance",
-      "securityGroups": "#{myRedshiftSecurityGrps}",
-      "id": "Ec2Instance",
-      "type": "Ec2Resource",
-      "terminateAfter": "2 Hours"
-    },
-    {
-      "myComment": "This object contains information about the Redshift database.",
-
-      "database": {
-        "ref": "RedshiftCluster"
-      },
-      "createTableSql": "create table songs(track_id varchar(2048) not null distkey sortkey, title varchar(2048), song_id varchar(2048), release_name varchar(2048), artist_id varchar(2048), artist_mbid varchar(2048), artist_name varchar(2048), duration float, artist_familiarity float, artist_hotness float, year int);",
-      "primaryKeys": "#{myPrimaryKeys}",
-      "name": "DestRedshiftTable",
-      "id": "DestRedshiftTable",
-      "type": "RedshiftDataNode",
-      "tableName": "songs"
-    },
-    {
-      "myComment": "This object is used to specify the copy activity for moving data from S3 to Redshift.",
-
-      "output": {
-        "ref": "DestRedshiftTable"
-      },
-      "input": {
-        "ref": "S3InputDataNode"
-      },
-      "dependsOn": {
-        "ref": "ActivityId_TQ7lW"
-      },
-      "name": "RedshiftLoadActivity",
-      "commandOptions": "#{myRedshiftCopyOpts}",
-      "runsOn": {
-        "ref": "Ec2Instance"
-      },
-      "id": "RedshiftLoadActivity",
-      "type": "RedshiftCopyActivity",
-      "insertMode": "TRUNCATE"
-    },
-    {
-      "myComment": "This object provides information on the S3 staging data.",
-
-      "directoryPath": "#{myS3StagingPath}",
-      "name": "S3InputDataNode",
-      "id": "S3InputDataNode",
-      "type": "S3DataNode"
     }
   ],
-  "parameters": [
-    {
-      "myComment": "This parameter specifies the default security group for the Redshift cluster.",
-
-      "default": "default",
-      "watermark": "security group name",
-      "helpText": "The names of one or more security groups that are assigned to the Redshift cluster.",
-      "description": "Redshift security group(s)",
-      "isArray": "true",
-      "id": "myRedshiftSecurityGrps",
-      "type": "String"
-    },
-    {
-      "myComment": "This parameter specifies the S3 staging directory where Sqoop will place data extracted from RDS and the RedshiftCopyActivity will look to load data into Redshift.",
-
-      "helpText": "The S3 folder where one or more input files are located.",
-      "description": "Input S3 folder",
-      "id": "myS3StagingPath",
-      "type": "AWS::S3::ObjectKey"
-    },
-    {
-      "myComment": "This parameter specifies options to the Redshift copy command.",
-
-      "helpLink": "https://docs.aws.amazon.com/console/datapipeline/redshiftcopyactivity",
-      "watermark": "IGNOREHEADER AS 1",
-      "helpText": "COPY parameters to pass to Redshift",
-      "description": "Copy options",
-      "isArray": "true",
-      "optional": "true",
-      "id": "myRedshiftCopyOpts",
-      "type": "String"
-    },
-    {
-      "myComment": "This parameter specifies the primary keys in the Redshift table.",
-
-      "helpLink": "https://docs.aws.amazon.com/console/datapipeline/dp_object_redshiftdatanode",
-      "helpText": "The names of all primary key columns in the Redshift table used to merge existing data with new data.",
-      "description": "Primary keys",
-      "isArray": "true",
-      "optional": "true",
-      "id": "myPrimaryKeys",
-      "type": "String"
-    }
-  ]
+  "parameters": []
 }
