@@ -1,0 +1,47 @@
+{
+  "objects": [
+    {
+      "occurrences": "1",
+      "period": "1 Day",
+      "name": "RunOnce",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "s3://edptestdiagnose/",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "name": "DefaultResource1",
+      "id": "ResourceId_1",
+      "type": "Ec2Resource"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "name": "DefaultActivity1",
+      "id": "ActivityId_1",
+      "runsOn": {
+        "ref": "ResourceId_1"
+      },
+      "type": "ShellCommandActivity",
+      "command": "wget https://s3.amazonaws.com/data-pipeline-samples/diagnose-sample/Diagnose.jar;java -jar Diagnose.jar"
+    }
+  ],
+  "parameters": []
+}
