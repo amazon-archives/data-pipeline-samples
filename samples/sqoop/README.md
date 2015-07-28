@@ -19,7 +19,7 @@ Finally, you must install the [Python SDK for AWS](http://boto3.readthedocs.org/
 $> pip install boto3
 ```
 
-## Step 1: Setup resources and data
+## Step 1: Priming this sample
 
 Run the following commands to give the setup script executable permissions and run the script. The AWS resources that will be created are a Redshift database, RDS MySQL database, and optionally an S3 bucket.
 
@@ -33,7 +33,7 @@ If the path is not provided, the script will create the S3 bucket for you.
 $> python Setup.py [s3://optional/path/to/s3/location]
 ```
 
-## Step 2: Run the pipeline using AWS CLI commands
+## Step 2: Run this sample pipeline using the AWS CLI
 
   ```
   $> aws datapipeline create-pipeline --name sqoop_pipeline --unique-id <unique_id>
@@ -74,7 +74,7 @@ $> python Setup.py [s3://optional/path/to/s3/location]
 
 ```
 
-## Step 3: Tear down 
+## Step 3: IMPORTANT! Tear down this sample
 
 Run the following command to give the script executable permissions and to run the script. The script will destroy the AWS resources created by the setup script.
 
