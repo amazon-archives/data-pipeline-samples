@@ -1,7 +1,7 @@
 #!/bin/bash
 
-aws s3 cp s3://public/create-table-from-kinesis-stream.q .
-aws s3 cp s3://public//write-kinesis-to-s3.q .
+aws s3 cp s3://data-pipeline-samples/kinesis-apache-access-logs/create-table-from-kinesis-stream.q .
+aws s3 cp s3://data-pipeline-samples/kinesis-apache-access-logs//write-kinesis-to-s3.q .
 
 S3_LOCATION=$1
 
