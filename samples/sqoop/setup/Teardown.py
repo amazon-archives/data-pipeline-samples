@@ -13,8 +13,8 @@ if __name__ == '__main__':
     s3_path = sys.argv[3] if len(sys.argv) > 3 else ""
 
     sqoop_sample = SqoopSample()
-    #sqoop_sample.destroy_rds(rds_id)
-    #sqoop_sample.destroy_redshift(redshift_id)
+    sqoop_sample.destroy_rds(rds_id)
+    sqoop_sample.destroy_redshift(redshift_id)
 
     if s3_path != "":
         sqoop_sample.destroy_s3_bucket(s3_path)
