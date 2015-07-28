@@ -32,7 +32,7 @@
         "ref": "A_Fresh_NewEMRInstance"
       },
       "type": "ShellCommandActivity",
-      "scriptUri": "s3://public/script-runner.sh",
+      "scriptUri": "s3://data-pipeline-samples/kinesis-apache-access-logs/script-runner.sh",
       "scriptArgument": "#{myS3Output}"
     }
   ],
