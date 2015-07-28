@@ -118,8 +118,6 @@ Let's look at the Hello world example pipeline located at samples/helloworld/hel
       "period": "1 Day",
       "startAt": "FIRST_ACTIVATION_DATE_TIME"
     },
-
-
     { 
       "myComment": "This object is used to create the Amazon EC2 Instance that activities 
       in the pipeline will be executed on.",
