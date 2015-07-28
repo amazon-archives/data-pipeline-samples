@@ -27,6 +27,10 @@ You can push sample data to your stream by running
 
 ##Setting up the pipeline
 
+The instructions at https://github.com/awslabs/data-pipeline-samples tell you how to create, setup, and activate a pipeline. 
+
 ```sh
- $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/helloworld/helloworld.json --parameter-values myS3LogsPath="<your s3 logging path>" myS3Output="<your s3 output path>"
+ $> aws datapipeline create-pipeline --name kinesis_apache_access_logs --unique-id kinesis_apache_access_logs
+ $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/kinesis/kinesis-to-s3.json --parameter-values myS3LogsPath="<your s3 logging path>" myS3Output="<your s3 output path>"
+ $> aws datapipeline activate-pipeline --pipeline-id df-0554887H4KXKTY59MRJ
 ```
