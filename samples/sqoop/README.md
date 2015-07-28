@@ -14,20 +14,21 @@ You must have the AWS CLI and default IAM roles setup in order to run the sample
 
 You must also provide the S3Path of a S3 bucket with write permissions. See [here](http://docs.aws.amazon.com/AmazonS3/latest/UG/CreatingaBucket.html) for instructions on how to create an S3 bucket.
 
+Finally, you must install the [Python SDK for AWS](http://boto3.readthedocs.org/en/latest/guide/quickstart.html).
+```
+$> pip install boto3
+```
+
 ## Step 1: Setup resources and data
 
-Run the following script to set-up the databases and source data in your AWS account.
+Run the following commands to give the setup script executable permissions and run the script. The AWS resources that will be created are a Redshift database, RDS MySQL database, and optionally an S3 bucket.
 
-The script takes an *optional* parameter for an S3 path for staging data between RDS and Redshift. If you choose to provide your own S3 path, the bucket must be in the same region as what is set for your AWS CLI configuration.
+The script takes an *optional* parameter for an S3 path for staging data between RDS and Redshift. If you choose to provide your own S3 path, the bucket must be in the same region as what is set for your AWS CLI configuration.  In addition, this path cannot be an existing path as Sqoop is expected to create it in order to place the data it extracts from RDS (if the path you provide already exists, the setup process will issue an error message and exit).  Finally, please make sure the S3 bucket has a policy that allows data writes to it.  
 
 If the path is not provided, the script will create the S3 bucket for you.
-```
-$> ./setup.sh [s3://optional/path/to/s3/bucket]
-```
-*Note: Make sure the script has executable permissions.*
 
 ```
-$> chmod +x setup.sh
+$> python Setup.py [s3://optional/path/to/s3/location]
 ```
 
 ## Step 2: Run the pipeline using AWS CLI commands
@@ -44,7 +45,7 @@ $> chmod +x setup.sh
 
   # now upload the pipeline definition 
 
-  $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/sqoop/sqoop.json --parameter-values myS3StagingPath=<s3://your/s3/bucket/path> myRedshiftEndpoint=<redshift_endpoint> myRDSEndpoint=<rds_endpoint>
+  $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/sqoop/sqoop.json --parameter-values myS3StagingPath=<s3://your/s3/staging/path> myRedshiftEndpoint=<redshift_endpoint> myRdsEndpoint=<rds_endpoint>
 
   # You receive a validation messages like this
 
@@ -73,18 +74,12 @@ $> chmod +x setup.sh
 
 ## Step 3: Tear down 
 
-Run the following script to destroy the databases and optionally the S3 bucket (only if it was created by setup.sh).
+Run the following command to give the script executable permissions and to run the script. The script will destroy the AWS resources created by the setup script.
 
 *Note: The setup script will provide the teardown command with parameters at end of the execution.*
 
 ```
-$> ./teardown.sh <rds_instance_id> <redshift_cluster_id> [s3://optional/path/to/s3/bucket/created/by/setup]
-```
-
-*Note: Make sure the script has executable permissions.*
-
-```
-$> chmod +x teardown.sh
+$> ./Teardown.py <rds_instance_id> <redshift_cluster_id> [s3://optional/path/to/s3/bucket/created/by/setup]
 ```
 
 ## Disclaimer
