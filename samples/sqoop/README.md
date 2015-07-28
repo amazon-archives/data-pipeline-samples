@@ -27,6 +27,8 @@ The script takes an *optional* parameter for an S3 path for staging data between
 
 If the path is not provided, the script will create the S3 bucket for you.
 
+*Setup and teardown scripts are located in the setup directory under the sqoop directory in the samples directory.*
+
 ```
 $> python Setup.py [s3://optional/path/to/s3/location]
 ```
