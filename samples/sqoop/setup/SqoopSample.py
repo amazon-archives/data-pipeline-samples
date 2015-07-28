@@ -1,4 +1,5 @@
 import boto3
+import re
 from SetupPipelineDefinition import SetupPipelineDefinitionHelper
 import time
 
@@ -6,34 +7,41 @@ import time
 class SqoopSample(object):
     def __init__(self):
         self.s3_bucket_path = ""
+        self.s3_bucket = ""
+        self.customer_provided_bucket = False
         self.rds_id = ""
         self.rds_endpoint = ""
-        self.rds_security_group = "sqoop_sample_rds_sec_group"
+        self.rds_security_group = "sqoop_sample_rds_security_group"
         self.redshift_id = ""
         self.redshift_endpoint = ""
-        self.redshift_security_group = 'sqoop_sample_rs_sec_group'
+        self.redshift_security_group = 'sqoop_sample_rs_security_group'
         self.pipeline_definition = SetupPipelineDefinitionHelper()
         self.account_id = ""
         self.pipeline_id = ""
 
     def check_for_s3_path_argument(self, args):
         if len(args) > 1:
+            self.customer_provided_bucket = True
             return args[1]
         else:
             return ""
 
-    def create_s3_bucket(self, s3_bucket_path):
+    def validate_s3_bucket_path(self, s3_bucket_path):
+        self.s3_bucket_path = s3_bucket_path[5:]
+        if re.match(r'\S+/+\S+',self.s3_bucket_path) == None:
+            print "ERROR: Please provide a s3 bucket with an empty path for the pipeline to use. example: s3://foo/bar"
+            return False
+
+        first_slash_position = self.s3_bucket_path.find('/')
+        self.s3_bucket = self.s3_bucket_path[first_slash_position:]
+        return True
+
+    def create_s3_bucket(self):
         client = boto3.client('s3')
-        if len(s3_bucket_path) > 0:
-            if s3_bucket_path.startswith("s3://"):
-                s3_bucket_path = s3_bucket_path[5:]
-            if not '/' in s3_bucket_path:
-                print "S3 bucket path must contain a subpath"
-            self.s3_bucket_path = s3_bucket_path
-        else:
-            self.s3_bucket_path = "sqoop-demo-" + str(int(time.time()))
-            print "Creating s3 bucket: s3://" + self.s3_bucket_path + '/test'
-            client.create_bucket(Bucket=self.s3_bucket_path)
+        self.s3_bucket = "sqoop-demo-" + str(int(time.time()))
+        self.s3_bucket_path = self.s3_bucket + '/test'
+        print "Creating s3 bucket: s3://" + self.s3_bucket_path
+        client.create_bucket(Bucket=self.s3_bucket)
 
     def create_rds_instance(self):
         self.rds_id = 'RDS-sqoop-' + str(int(time.time()))
@@ -138,27 +146,35 @@ class SqoopSample(object):
 
         client.activate_pipeline(pipelineId=self.pipeline_id)
 
-        response = client.describe_pipelines(pipelineIds=[self.pipeline_id])
-
         # check pipeline status
-        self._check_pipeline_state(response)
+        self._check_pipeline_state(client)
 
-    def _check_pipeline_state(self, response):
-        count = 0
-        pipeline_done = False
-        while count < 40 and pipeline_done is False:
-            for pipeline in response['pipelineDescriptionList'][0]['fields']:
-                if pipeline['stringValue'] == 'FINISHED':
-                    print "Setup pipeline run finished"
-                    pipeline_done = True
-                    break
-                elif pipeline['stringValue'] == 'FAILED':
-                    pipeline_done = True
-                    break
-                else:
-                    print "Setup pipeline run in progress..."
-                    count += 1
-                    time.sleep(30)
+    def _check_pipeline_state(self, client):
+        check_counts = 0
+        num_checks =50
+        while check_counts < num_checks:
+            response = client.describe_pipelines(pipelineIds=[self.pipeline_id])
+            if self._check_pipeline_state_iteration(response) == True:
+                return
+            else:
+                check_counts += 1
+                time.sleep(30)
+
+        if check_counts >= num_checks:
+            print "Timed out after waiting 25 minutes for pipeline run"
+
+    def _check_pipeline_state_iteration(self, response):
+        fields = response['pipelineDescriptionList'][0]['fields']
+        for field in fields:
+            if field['key'] == '@pipelineState' and field['stringValue'] == 'FINISHED':
+                print "Current pipeline status: " + field['stringValue']
+                return True
+            elif field['key'] == '@pipelineState' and field['stringValue'] == 'FAILED':
+                print "Current pipeline status: " + field['stringValue']
+                return True
+            elif field['key'] == '@pipelineState':
+                print "Current pipeline status: " + field['stringValue']
+                return False
 
     def print_setup_results(self):
         print ""
@@ -175,13 +191,17 @@ class SqoopSample(object):
         print ""
         print "You can copy and paste the following line to add the sample definition to your pipeline once it is " \
               "created (Step 2)"
-        print "aws datapipeline put-pipeline-definition --pipeline-id <pipeline-id>  " \
+        print "aws datapipeline put-pipeline-definition --pipeline-id <pipeline-id> " \
               "--pipeline-definition file://sqoop.json --parameter-values myRdsEndpoint=" + self.rds_endpoint + \
-              " myRedshiftEndpoint=" + self.redshift_endpoint + ' myS3StagingPath=s3://' + self.s3_bucket_path + '/test'
+              " myRedshiftEndpoint=" + self.redshift_endpoint + ' myS3StagingPath=s3://' + self.s3_bucket_path
         print ""
         print "If you wish to delete all the resources created for this sample, " \
               "please run the teardown script as follows"
-        print "python Teardown.py " + self.rds_id + " " + self.redshift_id + ' s3://' + self.s3_bucket_path + '/test'
+        
+        if self.customer_provided_bucket == True:
+            print "python Teardown.py " + self.rds_id + " " + self.redshift_id
+        else:
+            print "python Teardown.py " + self.rds_id + " " + self.redshift_id + ' s3://' + self.s3_bucket
 
     def destroy_rds(self, rds_id):
         print "Destroying RDS database with id: " + rds_id
