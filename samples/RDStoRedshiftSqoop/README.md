@@ -35,29 +35,35 @@ $> python setup/Setup.py --s3-path [s3://optional/path/to/s3/location]
 
 ## Step 2: Run this sample pipeline using the AWS CLI
 
-  ```
+```sh 
   $> aws datapipeline create-pipeline --name rds_to_rs_sqoop_pipeline --unique-id rds_to_rs_sqoop_pipeline
+```
 
-  # You receive a pipeline activity like this. 
+You receive a pipelineId like this. 
+```sh
   #   -----------------------------------------
   #   |             CreatePipeline             |
   #   +-------------+--------------------------+
   #   |  pipelineId |  <Your Pipeline ID>      |
   #   +-------------+--------------------------+
+```
 
-  # now upload the pipeline definition -- make sure the log path is different from the staging path and the staging path is empty
-
+Now upload the pipeline definition -- make sure the log path is different from the staging path and the staging path is empty
+```sh
   $> aws datapipeline put-pipeline-definition --pipeline-definition file://RDStoRedshift.json --parameter-values myS3StagingPath=<s3://your/s3/staging/path> myS3LogsPath=<s3://your/s3/logs/path> myRedshiftEndpoint=<redshift_endpoint> myRdsEndpoint=<rds_endpoint> --pipeline-id <Your Pipeline ID> 
+```
 
-  # You receive a validation messages like this
-
+You receive a validation messages like this
+```sh
   #   ----------------------- 
   #   |PutPipelineDefinition|
   #   +-----------+---------+
   #   |  errored  |  False  |
   #   +-----------+---------+
+```
 
-  # now activate the pipeline
+Now activate the pipeline
+```sh
   $> aws datapipeline activate-pipeline --pipeline-id <Your Pipeline ID>
 ```
 
@@ -85,7 +91,6 @@ You will receive status information on the pipeline.
   #
   #   5.  ActivityId_wQhxe                                    2015-07-29T01:06:17  WAITING_FOR_RUNNER
   #       @ActivityId_wQhxe_2015-07-29T01:06:17               2015-07-29T01:06:20
-
 ```
 
 Let the pipeline complete, then [connect to the Redshift cluster](http://docs.aws.amazon.com/redshift/latest/mgmt/connecting-to-cluster.html) with a sql client and query your data. 
