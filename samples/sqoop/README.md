@@ -30,7 +30,9 @@ If the path is not provided, the script will create the S3 bucket for you.
 *Setup and teardown scripts are located in the setup directory under the sqoop directory in the samples directory.*
 
 ```
+$> cd <GITCLONE>/data-pipeline-samples/samples/sqoop/setup
 $> python Setup.py [s3://optional/path/to/s3/location]
+$> cd ..   # get sample directory where you will find the pipeline sample 
 ```
 
 ## Step 2: Run this sample pipeline using the AWS CLI
