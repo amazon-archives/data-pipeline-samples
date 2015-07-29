@@ -1,10 +1,11 @@
+from SetupPipelineDefinition import SetupPipelineDefinitionHelper
+
 import boto3
 import re
-from SetupPipelineDefinition import SetupPipelineDefinitionHelper
 import time
 
 
-class SqoopSample(object):
+class RDStoRedshiftSqoopSample(object):
     def __init__(self):
         self.s3_bucket_path = ""
         self.s3_bucket = ""
@@ -19,16 +20,9 @@ class SqoopSample(object):
         self.account_id = ""
         self.pipeline_id = ""
 
-    def check_for_s3_path_argument(self, args):
-        if len(args) > 1:
-            self.customer_provided_bucket = True
-            return args[1]
-        else:
-            return ""
-
     def validate_s3_bucket_path(self, s3_bucket_path):
         self.s3_bucket_path = s3_bucket_path[5:]
-        if re.match(r'\S+/+\S+',self.s3_bucket_path) == None:
+        if re.match(r'\S+/+\S+',self.s3_bucket_path) is None:
             print "ERROR: Please provide a s3 bucket with an empty path for the pipeline to use. example: s3://foo/bar"
             return False
 
@@ -102,6 +96,10 @@ class SqoopSample(object):
                                                         EC2SecurityGroupName='elasticmapreduce-master',
                                                         EC2SecurityGroupOwnerId=self.account_id)
 
+        client.authorize_cluster_security_group_ingress(ClusterSecurityGroupName=self.redshift_security_group,
+                                                        EC2SecurityGroupName='elasticmapreduce-slave',
+                                                        EC2SecurityGroupOwnerId=self.account_id)
+
         # create cluster
         client.create_cluster(DBName='redshiftsqoop',
                               ClusterIdentifier=self.redshift_id,
@@ -125,7 +123,7 @@ class SqoopSample(object):
 
     def run_setup_datapipeline(self):
         pipeline_name = 'sqoop-setup-' + str(int(time.time()))
-        print "creating and running data pipeline to setup data in RDS with name: " + pipeline_name
+        print "Running data setup pipeline: " + pipeline_name
 
         client = boto3.client('datapipeline')
 
@@ -133,7 +131,6 @@ class SqoopSample(object):
                                         uniqueId=pipeline_name)
 
         self.pipeline_id = result['pipelineId']
-        print "Pipeline id: " + self.pipeline_id
 
         parameter_values = self.pipeline_definition.get_setup_pipeline_parameter_values()
         for param in parameter_values:
@@ -151,10 +148,10 @@ class SqoopSample(object):
 
     def _check_pipeline_state(self, client):
         check_counts = 0
-        num_checks =50
+        num_checks = 50
         while check_counts < num_checks:
             response = client.describe_pipelines(pipelineIds=[self.pipeline_id])
-            if self._check_pipeline_state_iteration(response) == True:
+            if self._check_pipeline_state_iteration(response):
                 return
             else:
                 check_counts += 1
@@ -167,41 +164,34 @@ class SqoopSample(object):
         fields = response['pipelineDescriptionList'][0]['fields']
         for field in fields:
             if field['key'] == '@pipelineState' and field['stringValue'] == 'FINISHED':
-                print "Current pipeline status: " + field['stringValue']
+                print "Setup pipeline status: " + field['stringValue']
                 return True
             elif field['key'] == '@pipelineState' and field['stringValue'] == 'FAILED':
-                print "Current pipeline status: " + field['stringValue']
+                print "Setup pipeline status: " + field['stringValue']
                 return True
             elif field['key'] == '@pipelineState':
-                print "Current pipeline status: " + field['stringValue']
+                print "Setup pipeline status: " + field['stringValue']
                 return False
 
     def print_setup_results(self):
         print ""
-        print "Set-up complete! You are now ready to proceed with the Sqoop Sample."
+        print "Set-up complete! You are now ready to proceed with the RDS to Redshift Sqoop Sample."
         print "Please refer to the sample README for instructions on how to run this sample."
-        print "**************************************************"
-        print "*               Resource Summary                 *"
-        print "**************************************************"
-        print "RDS ID: " + self.rds_id
-        print "RDS Hostname: " + self.rds_endpoint
-        print "Redshift ID: " + self.redshift_id
-        print "Redshift Hostname: " + self.redshift_endpoint
-        print "S3 path: s3://" + self.s3_bucket_path
         print ""
         print "You can copy and paste the following line to add the sample definition to your pipeline once it is " \
-              "created (Step 2)"
-        print "aws datapipeline put-pipeline-definition --pipeline-id <pipeline-id> " \
-              "--pipeline-definition file://sqoop.json --parameter-values myRdsEndpoint=" + self.rds_endpoint + \
-              " myRedshiftEndpoint=" + self.redshift_endpoint + ' myS3StagingPath=s3://' + self.s3_bucket_path
+              "created (Step 2):"
+        print "aws datapipeline put-pipeline-definition --pipeline-definition file://RDStoRedshiftSqoop.json " \
+              "--parameter-values myRdsEndpoint=" + self.rds_endpoint + \
+              " myRedshiftEndpoint=" + self.redshift_endpoint + ' myS3StagingPath=s3://' + self.s3_bucket_path \
+              + " --pipeline-id <pipeline-id>"
         print ""
         print "If you wish to delete all the resources created for this sample, " \
               "please run the teardown script as follows"
         
-        if self.customer_provided_bucket == True:
-            print "python Teardown.py " + self.rds_id + " " + self.redshift_id
+        if self.customer_provided_bucket:
+            print "python setup/Teardown.py  --rds-instance-id " + self.rds_id + " --redshift-cluster-id " + self.redshift_id
         else:
-            print "python Teardown.py " + self.rds_id + " " + self.redshift_id + ' s3://' + self.s3_bucket
+            print "python setup/Teardown.py  --rds-instance-id " + self.rds_id + " --redshift-cluster-id " + self.redshift_id + ' --s3-path s3://' + self.s3_bucket
 
     def destroy_rds(self, rds_id):
         print "Destroying RDS database with id: " + rds_id
@@ -236,14 +226,18 @@ class SqoopSample(object):
     def destroy_s3_bucket(self, s3_bucket_path):
         print "Destroying S3 bucket with path: " + s3_bucket_path
 
-        if s3_bucket_path.startswith("s3://"):
-                s3_bucket_path = s3_bucket_path[5:]
-
+        s3_bucket = self._get_bucket_root(s3_bucket_path)
         s3 = boto3.resource('s3')
-        client = boto3.client('s3')
-        bucket = s3.Bucket(s3_bucket_path)
-
-        for s3_object in bucket.objects.all():
-            client.delete_object(Bucket=s3_bucket_path, Key=s3_object.key)
+        bucket = s3.Bucket(s3_bucket)
+        for key in bucket.objects.all():
+            key.delete()
 
         bucket.delete()
+
+    def _get_bucket_root(self, s3_bucket_path):
+        if s3_bucket_path.startswith("s3://"):
+            s3_bucket_path = s3_bucket_path[5:]
+        first_slash_position = s3_bucket_path.find('/')
+        if first_slash_position is not -1:
+            s3_bucket_path = s3_bucket_path[:first_slash_position]
+        return s3_bucket_path

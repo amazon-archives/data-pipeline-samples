@@ -1,4 +1,4 @@
-# Data Pipeline Sqoop Sample
+# Data Pipeline RDStoRedshiftSqoop Sample
 
 ## Overview
 
@@ -28,17 +28,15 @@ The script takes an *optional* parameter for an S3 path for staging data between
 If the path is not provided, the script will create the S3 bucket for you.
 
 *Setup and teardown scripts are located in the setup directory under the sqoop directory in the samples directory.*
-
 ```
-$> cd <GITCLONE>/data-pipeline-samples/samples/sqoop/setup
-$> python Setup.py [s3://optional/path/to/s3/location]
-$> cd ..   # get sample directory where you will find the pipeline sample 
+$> cd <GITCLONE>/data-pipeline-samples/samples/RDStoRedshiftSqoop
+$> python setup/Setup.py --s3-path [s3://optional/path/to/s3/location]
 ```
 
 ## Step 2: Run this sample pipeline using the AWS CLI
 
   ```
-  $> aws datapipeline create-pipeline --name sqoop_pipeline --unique-id sqoop_pipeline
+  $> aws datapipeline create-pipeline --name rds_to_rs_sqoop_pipeline --unique-id rds_to_rs_sqoop_pipeline
 
   # You receive a pipeline activity like this. 
   #   -----------------------------------------
@@ -47,9 +45,9 @@ $> cd ..   # get sample directory where you will find the pipeline sample
   #   |  pipelineId |  <Your Pipeline ID>      |
   #   +-------------+--------------------------+
 
-  # now upload the pipeline definition 
+  # now upload the pipeline definition -- make sure the log path is different from the staging path and the staging path is empty
 
-  $> aws datapipeline put-pipeline-definition --pipeline-id <Your Pipeline ID> --pipeline-definition file://sqoop.json --parameter-values myS3StagingPath=<s3://your/s3/staging/path> myS3LogsPath=<s3://your/s3/logs/path> myRedshiftEndpoint=<redshift_endpoint> myRdsEndpoint=<rds_endpoint>
+  $> aws datapipeline put-pipeline-definition --pipeline-definition file://RDStoRedshift.json --parameter-values myS3StagingPath=<s3://your/s3/staging/path> myS3LogsPath=<s3://your/s3/logs/path> myRedshiftEndpoint=<redshift_endpoint> myRdsEndpoint=<rds_endpoint> --pipeline-id <Your Pipeline ID> 
 
   # You receive a validation messages like this
 
@@ -64,7 +62,7 @@ $> cd ..   # get sample directory where you will find the pipeline sample
 ```
 
 Check the status of your pipeline 
-```sh
+```
   >$ aws datapipeline list-runs --pipeline-id <Your Pipeline ID>
 ```
 
@@ -90,22 +88,19 @@ You will receive status information on the pipeline.
 
 ```
 
-Let the pipeline complete, then connecto to the Redshift cluster with a sql client and query your data. 
+Let the pipeline complete, then [connect to the Redshift cluster](http://docs.aws.amazon.com/redshift/latest/mgmt/connecting-to-cluster.html) with a sql client and query your data. 
 
-```sh
+```
   $> psql "host=<endpoint> user=<userid> dbname=<databasename> port=<port> sslmode=verify-ca sslrootcert=<certificate>"
   $  psql> SELECT * FROM songs;
 ```
 
 ## Step 3: IMPORTANT! Tear down this sample
 
-Run the following command to give the script executable permissions and to run the script. The script will destroy the AWS resources created by the setup script.
-
 *Note: The setup script will provide the teardown command with parameters at end of the execution.*
 
 ```
-$> cd setup
-$> python Teardown.py <rds_instance_id> <redshift_cluster_id> [s3://optional/path/to/s3/bucket/created/by/setup]
+$> python setup/Teardown.py --rds-instance-id <rds_instance_id> --redshift-cluster-id <redshift_cluster_id> --s3-path [s3://optional/path/to/s3/bucket/created/by/setup]
 ```
 
 ## Disclaimer
