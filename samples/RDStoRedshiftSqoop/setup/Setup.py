@@ -1,4 +1,4 @@
-from RdsToRedshiftSqoopSample import RDStoS3SqoopSample
+from RdsToRedshiftSqoopSample import RDStoRedshiftSqoopSample
 from Utilities import check_working_directory
 
 import argparse
@@ -12,7 +12,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     s3_bucket_path = args.s3_bucket_path
 
-    sample = RDStoS3SqoopSample()
+    sample = RDStoRedshiftSqoopSample()
 
     if s3_bucket_path is None:
         sample.create_s3_bucket()

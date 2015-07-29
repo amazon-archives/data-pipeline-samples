@@ -1,4 +1,4 @@
-from RdsToRedshiftSqoopSample import RDStoS3SqoopSample
+from RdsToRedshiftSqoopSample import RDStoRedshiftSqoopSample
 from Utilities import check_working_directory
 
 import argparse
@@ -13,7 +13,7 @@ if __name__ == '__main__':
     parser.add_argument('--redshift-cluster-id', action="store", dest="redshift_cluster_id")
     args = parser.parse_args()
 
-    sample = RDStoS3SqoopSample()
+    sample = RDStoRedshiftSqoopSample()
 
     if args.rds_instance_id is not None:
         sample.destroy_rds(args.rds_instance_id)

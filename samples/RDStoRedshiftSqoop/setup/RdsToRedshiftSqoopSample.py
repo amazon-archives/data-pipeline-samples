@@ -5,7 +5,7 @@ import re
 import time
 
 
-class RDStoS3SqoopSample(object):
+class RDStoRedshiftSqoopSample(object):
     def __init__(self):
         self.s3_bucket_path = ""
         self.s3_bucket = ""
