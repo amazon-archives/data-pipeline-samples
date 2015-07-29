@@ -3,7 +3,7 @@
     {
       "myComment": "This object is used to set default configuration for objects in the pipeline.",
 
-      "id": "Default"
+      "id": "Default",
       "name": "Default",
       "failureAndRerunMode": "CASCADE",
       "schedule": {
@@ -12,7 +12,7 @@
       "resourceRole": "DataPipelineDefaultResourceRole",
       "role": "DataPipelineDefaultRole",
       "scheduleType": "cron",
-      "pipelineLogUri": "#{myS3LogsPath}
+      "pipelineLogUri": "#{myS3LogsPath}"
     },
     {
       "myComment": "This object is used to run the Sqoop activity that extracts data from RDS.",
