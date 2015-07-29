@@ -61,20 +61,8 @@ $> cd ..   # get sample directory where you will find the pipeline sample
 
   # now activate the pipeline
   $> aws datapipeline activate-pipeline --pipeline-id <Your Pipeline ID>
-
-  #check the status of your pipeline 
-
-  $> aws datapipeline list-runs --pipeline-id <Your Pipeline ID>
-
-  #          Name                                                Scheduled Start      Status
-  #          ID                                                  Started              Ended
-  #   ---------------------------------------------------------------------------------------------------
-  #      1.  A_Fresh_NewEC2Instance                              2015-07-19T22:48:30  RUNNING
-  #          @A_Fresh_NewEC2Instance_2015-07-19T22:48:30         2015-07-19T22:48:35
-  #   
-  #      2.  ...
-
 ```
+
 Check the status of your pipeline 
 ```sh
   >$ aws datapipeline list-runs --pipeline-id <Your Pipeline ID>
@@ -100,6 +88,13 @@ You will receive status information on the pipeline.
   #   5.  ActivityId_wQhxe                                    2015-07-29T01:06:17  WAITING_FOR_RUNNER
   #       @ActivityId_wQhxe_2015-07-29T01:06:17               2015-07-29T01:06:20
 
+```
+
+Let the pipeline complete, then connecto to the Redshift cluster with a sql client and query your data. 
+
+```sh
+  $> psql "host=<endpoint> user=<userid> dbname=<databasename> port=<port> sslmode=verify-ca sslrootcert=<certificate>"
+  $  psql> SELECT * FROM songs;
 ```
 
 ## Step 3: IMPORTANT! Tear down this sample
