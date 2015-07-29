@@ -104,7 +104,8 @@ Run the following command to give the script executable permissions and to run t
 *Note: The setup script will provide the teardown command with parameters at end of the execution.*
 
 ```
-$> ./Teardown.py <rds_instance_id> <redshift_cluster_id> [s3://optional/path/to/s3/bucket/created/by/setup]
+$> cd setup
+$> python Teardown.py <rds_instance_id> <redshift_cluster_id> [s3://optional/path/to/s3/bucket/created/by/setup]
 ```
 
 ## Disclaimer
