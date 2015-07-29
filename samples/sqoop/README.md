@@ -44,12 +44,12 @@ $> cd ..   # get sample directory where you will find the pipeline sample
   #   -----------------------------------------
   #   |             CreatePipeline             |
   #   +-------------+--------------------------+
-  #   |  pipelineId |  df-0554887H4KXKTY59MRJ  |
+  #   |  pipelineId |  <Your Pipeline ID>      |
   #   +-------------+--------------------------+
 
   # now upload the pipeline definition 
 
-  $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ --pipeline-definition file://samples/sqoop/sqoop.json --parameter-values myS3StagingPath=<s3://your/s3/staging/path> myRedshiftEndpoint=<redshift_endpoint> myRdsEndpoint=<rds_endpoint>
+  $> aws datapipeline put-pipeline-definition --pipeline-id <Your Pipeline ID> --pipeline-definition file://samples/sqoop/sqoop.json --parameter-values myS3StagingPath=<s3://your/s3/staging/path> myRedshiftEndpoint=<redshift_endpoint> myRdsEndpoint=<rds_endpoint>
 
   # You receive a validation messages like this
 
@@ -60,11 +60,11 @@ $> cd ..   # get sample directory where you will find the pipeline sample
   #   +-----------+---------+
 
   # now activate the pipeline
-  $> aws datapipeline activate-pipeline --pipeline-id df-0554887H4KXKTY59MRJ
+  $> aws datapipeline activate-pipeline --pipeline-id <Your Pipeline ID>
 
   #check the status of your pipeline 
 
-  $> aws datapipeline list-runs --pipeline-id df-0554887H4KXKTY59MRJ
+  $> aws datapipeline list-runs --pipeline-id <Your Pipeline ID>
 
   #          Name                                                Scheduled Start      Status
   #          ID                                                  Started              Ended
