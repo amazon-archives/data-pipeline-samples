@@ -38,7 +38,7 @@ $> cd ..   # get sample directory where you will find the pipeline sample
 ## Step 2: Run this sample pipeline using the AWS CLI
 
   ```
-  $> aws datapipeline create-pipeline --name sqoop_pipeline --unique-id <unique_id>
+  $> aws datapipeline create-pipeline --name sqoop_pipeline --unique-id sqoop_pipeline
 
   # You receive a pipeline activity like this. 
   #   -----------------------------------------
