@@ -75,6 +75,32 @@ $> cd ..   # get sample directory where you will find the pipeline sample
   #      2.  ...
 
 ```
+Check the status of your pipeline 
+```sh
+  >$ aws datapipeline list-runs --pipeline-id <Your Pipeline ID>
+```
+
+You will receive status information on the pipeline.  
+```sh
+  #       Name                                                Scheduled Start      Status
+  #       ID                                                  Started              Ended
+  #---------------------------------------------------------------------------------------------------
+  #   1.  ActivityId_6OGtu                                    2015-07-29T01:06:17  WAITING_ON_DEPENDENCIES
+  #       @ActivityId_6OGtu_2015-07-29T01:06:17               2015-07-29T01:06:20
+  #
+  #   2.  ResourceId_z9RNH                                    2015-07-29T01:06:17  CREATING
+  #       @ResourceId_z9RNH_2015-07-29T01:06:17               2015-07-29T01:06:20
+  #
+  #   3.  DataNodeId_7EqZ7                                    2015-07-29T01:06:17  WAITING_ON_DEPENDENCIES
+  #       @DataNodeId_7EqZ7_2015-07-29T01:06:17               2015-07-29T01:06:22
+  #
+  #   4.  DataNodeId_ImmS9                                    2015-07-29T01:06:17  FINISHED
+  #       @DataNodeId_ImmS9_2015-07-29T01:06:17               2015-07-29T01:06:20  2015-07-29T01:06:21
+  #
+  #   5.  ActivityId_wQhxe                                    2015-07-29T01:06:17  WAITING_FOR_RUNNER
+  #       @ActivityId_wQhxe_2015-07-29T01:06:17               2015-07-29T01:06:20
+
+```
 
 ## Step 3: IMPORTANT! Tear down this sample
 
