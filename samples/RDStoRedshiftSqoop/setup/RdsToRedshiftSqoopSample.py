@@ -183,15 +183,15 @@ class RDStoRedshiftSqoopSample(object):
         print "aws datapipeline put-pipeline-definition --pipeline-definition file://RDStoRedshiftSqoop.json " \
               "--parameter-values myRdsEndpoint=" + self.rds_endpoint + \
               " myRedshiftEndpoint=" + self.redshift_endpoint + ' myS3StagingPath=s3://' + self.s3_bucket_path \
-              + " --pipeline-id <pipeline-id>"
+              + " myS3LogsPath=s3://<s3-logs-path> --pipeline-id <pipeline-id>"
         print ""
         print "If you wish to delete all the resources created for this sample, " \
               "please run the teardown script as follows"
         
         if self.customer_provided_bucket:
-            print "python setup/Teardown.py  --rds-instance-id " + self.rds_id + " --redshift-cluster-id " + self.redshift_id
+            print "python setup/Teardown.py --rds-instance-id " + self.rds_id + " --redshift-cluster-id " + self.redshift_id
         else:
-            print "python setup/Teardown.py  --rds-instance-id " + self.rds_id + " --redshift-cluster-id " + self.redshift_id + ' --s3-path s3://' + self.s3_bucket
+            print "python setup/Teardown.py --rds-instance-id " + self.rds_id + " --redshift-cluster-id " + self.redshift_id + ' --s3-path s3://' + self.s3_bucket
 
     def destroy_rds(self, rds_id):
         print "Destroying RDS database with id: " + rds_id
