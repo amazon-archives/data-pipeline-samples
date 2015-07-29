@@ -1,11 +1,22 @@
 {
   "objects": [
     {
-      "myComment": "This object is used to run the Sqoop activity that extracts data from RDS.",
+      "myComment": "This object is used to set default configuration for objects in the pipeline.",
 
+      "id": "Default",
+      "name": "Default",
+      "failureAndRerunMode": "CASCADE",
       "schedule": {
         "ref": "DefaultSchedule"
       },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "scheduleType": "cron",
+      "pipelineLogUri": "#{myS3LogsPath}"
+    },
+    {
+      "myComment": "This object is used to run the Sqoop activity that extracts data from RDS.",
+
       "name": "Sqoop",
       "id": "ActivityId_wQhxe",
       "runsOn": {
@@ -22,9 +33,6 @@
       },
       "input": {
         "ref": "DataNodeId_ImmS9"
-      },
-      "schedule": {
-        "ref": "DefaultSchedule"
       },
       "dependsOn": {
         "ref": "ActivityId_wQhxe"
@@ -61,20 +69,15 @@
       "myComment": "This object is used to provide information for the EMR cluster bootstrap",
 
       "bootstrapAction": "s3://data-pipeline-samples/sqoop-activity/install_sqoop_ba.sh",
-      "schedule": {
-        "ref": "DefaultSchedule"
-      },
       "name": "HadoopCluster",
       "id": "ResourceId_z9RNH",
       "amiVersion": "3.8.0",
-      "type": "EmrCluster"
+      "type": "EmrCluster",
+      "terminateAfter": "1 Hour"
     },
     {
       "myComment": "This object provides information on the S3 staging data.",
 
-      "schedule": {
-        "ref": "DefaultSchedule"
-      },
       "directoryPath": "#{myS3StagingPath}",
       "name": "S3Input",
       "id": "DataNodeId_ImmS9",
@@ -83,9 +86,6 @@
     {
       "myComment": "This object contains information about the Redshift database.",
 
-      "schedule": {
-        "ref": "DefaultSchedule"
-      },
       "createTableSql": "create table IF NOT EXISTS songs (track_id varchar(2048) not null distkey sortkey, title varchar(2048), song_id varchar(2048), release_name varchar(2048), artist_id varchar(2048), artist_mbid varchar(2048), artist_name varchar(2048), duration float, artist_familiarity float, artist_hotness float, year int);",
       "database": {
         "ref": "RedshiftDatabaseId_S34X5"
@@ -95,19 +95,6 @@
       "id": "DataNodeId_7EqZ7",
       "type": "RedshiftDataNode",
       "tableName": "songs"
-    },
-    {
-      "myComment": "This object is used to set default configuration for objects in the pipeline.",
-
-      "failureAndRerunMode": "CASCADE",
-      "schedule": {
-        "ref": "DefaultSchedule"
-      },
-      "resourceRole": "DataPipelineDefaultResourceRole",
-      "role": "DataPipelineDefaultRole",
-      "scheduleType": "cron",
-      "name": "Default",
-      "id": "Default"
     }
   ],
   "parameters": []
