@@ -49,7 +49,7 @@ $> cd ..   # get sample directory where you will find the pipeline sample
 
   # now upload the pipeline definition 
 
-  $> aws datapipeline put-pipeline-definition --pipeline-id <Your Pipeline ID> --pipeline-definition file://samples/sqoop/sqoop.json --parameter-values myS3StagingPath=<s3://your/s3/staging/path> myRedshiftEndpoint=<redshift_endpoint> myRdsEndpoint=<rds_endpoint>
+  $> aws datapipeline put-pipeline-definition --pipeline-id <Your Pipeline ID> --pipeline-definition file://sqoop.json --parameter-values myS3StagingPath=<s3://your/s3/staging/path> myRedshiftEndpoint=<redshift_endpoint> myRdsEndpoint=<rds_endpoint>
 
   # You receive a validation messages like this
 
