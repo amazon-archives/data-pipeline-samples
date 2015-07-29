@@ -1,6 +1,20 @@
 {
   "objects": [
     {
+      "myComment": "This object is used to set default configuration for objects in the pipeline.",
+
+      "id": "Default",
+      "name": "Default",
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "scheduleType": "cron",
+      "pipelineLogUri": "#{myS3LogsPath}"
+    },
+    {
       "myComment": "This object is used to run the Sqoop activity that extracts data from RDS.",
 
       "name": "Sqoop",
@@ -58,7 +72,8 @@
       "name": "HadoopCluster",
       "id": "ResourceId_z9RNH",
       "amiVersion": "3.8.0",
-      "type": "EmrCluster"
+      "type": "EmrCluster",
+      "terminateAfter": "1 Hour"
     },
     {
       "myComment": "This object provides information on the S3 staging data.",
@@ -80,19 +95,6 @@
       "id": "DataNodeId_7EqZ7",
       "type": "RedshiftDataNode",
       "tableName": "songs"
-    },
-    {
-      "myComment": "This object is used to set default configuration for objects in the pipeline.",
-
-      "failureAndRerunMode": "CASCADE",
-      "schedule": {
-        "ref": "DefaultSchedule"
-      },
-      "resourceRole": "DataPipelineDefaultResourceRole",
-      "role": "DataPipelineDefaultRole",
-      "scheduleType": "cron",
-      "name": "Default",
-      "id": "Default"
     }
   ],
   "parameters": []
