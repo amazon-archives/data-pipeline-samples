@@ -71,6 +71,5 @@
         "type" : "AWS::S3::ObjectKey",
         "description" : "S3 path for staging directory."
      }
-
   ]
 }
