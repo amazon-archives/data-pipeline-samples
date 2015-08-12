@@ -57,7 +57,7 @@
     }
   ],
   "parameters": [
-  	 {
+    {
         "myComment": "This Parameter specifies the S3 logging path for the pipeline. It is used by the 'Default' object to set the 'pipelineLogUri' value. Using Parameters helps users avoid hard coding variables in pipeline definitions. Users can instead supply these parameters when calling 'aws datapipeline put-pipeline-definition' or 'aws datapipeline activate-pipeline-definition'.",
 
         "id" : "myS3LogsPath",
@@ -71,6 +71,5 @@
         "type" : "AWS::S3::ObjectKey",
         "description" : "S3 path for staging directory."
      }
-
   ]
 }
