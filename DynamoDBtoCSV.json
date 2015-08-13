@@ -42,7 +42,7 @@
       },
       "resourceRole": "DataPipelineDefaultResourceRole",
       "role": "DataPipelineDefaultRole",
-      "pipelineLogUri": "s3://gytrd/logs",
+      "pipelineLogUri": "#{myLogUri}",
       "scheduleType": "cron",
       "name": "Default",
       "id": "Default"
@@ -62,7 +62,7 @@
       "schedule": {
         "ref": "DefaultSchedule"
       },
-      "directoryPath": "#{myOutputS3Loc}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}",
+      "directoryPath": "#{myOutputS3Loc}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}/",
       "dataFormat": {
         "ref": "DataFormatId_xqWRk"
       },
@@ -109,6 +109,11 @@
     {
       "description": "DynamoDB table column mapping",
       "id": "myDDBTableColMapping",
+      "type": "String"
+    },
+    {
+      "description": "DataPipeline Log Uri",
+      "id": "myLogUri",
       "type": "String"
     }
   ]
