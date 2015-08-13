@@ -49,7 +49,6 @@
     },
     {
       "name": "EmrClusterForBackup",
-      "keyPair": "gytrd-key",
       "coreInstanceType": "m1.medium",
       "coreInstanceCount": "1",
       "masterInstanceType": "m1.medium",
