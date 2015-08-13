@@ -1,0 +1,115 @@
+{
+  "objects": [
+    {
+      "output": {
+        "ref": "DataNodeId_cnlSW"
+      },
+      "input": {
+        "ref": "DataNodeId_1ERqq"
+      },
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "name": "TableBackupActivity",
+      "hiveScript": "DROP TABLE IF EXISTS tempHiveTable;\n\nDROP TABLE IF EXISTS s3TempTable;\n\nCREATE EXTERNAL TABLE tempHiveTable (#{myDDBTableCols})\nSTORED BY 'org.apache.hadoop.hive.dynamodb.DynamoDBStorageHandler' \nTBLPROPERTIES (\"dynamodb.table.name\" = \"#{myDDBTableName}\", \"dynamodb.column.mapping\" = \"#{myDDBTableColMapping}\");\n                    \nCREATE EXTERNAL TABLE s3TempTable (#{myDDBTableCols})\nROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LINES TERMINATED BY '\\n'\nLOCATION '#{myOutputS3Loc}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}';\n                    \nINSERT OVERWRITE TABLE s3TempTable SELECT * FROM tempHiveTable;",
+      "runsOn": { "ref" : "EmrClusterForBackup" },
+      "id": "TableBackupActivity",
+      "type": "HiveActivity"
+    },
+    {
+      "period": "1 days",
+      "name": "Every 1 day",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "dataFormat": {
+        "ref": "DDBExportFormat"
+      },
+      "name": "DynamoDB",
+      "id": "DataNodeId_1ERqq",
+      "type": "DynamoDBDataNode",
+      "tableName": "#{myDDBTableName}"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "s3://gytrd/logs",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "name": "EmrClusterForBackup",
+      "keyPair": "gytrd-key",
+      "coreInstanceType": "m1.medium",
+      "coreInstanceCount": "1",
+      "masterInstanceType": "m1.medium",
+      "amiVersion": "3.3.2",
+      "id": "EmrClusterForBackup",
+      "type": "EmrCluster",
+      "terminateAfter": "2 Hours"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "directoryPath": "#{myOutputS3Loc}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}",
+      "dataFormat": {
+        "ref": "DataFormatId_xqWRk"
+      },
+      "name": "S3DataNode",
+      "id": "DataNodeId_cnlSW",
+      "type": "S3DataNode"
+    },
+    {
+      "name": "DefaultDataFormat1",
+      "column": "id",
+      "id": "DataFormatId_xqWRk",
+      "type": "CSV"
+    },
+    {
+      "column": "id STRING",
+      "name": "DDBExportFormat",
+      "id": "DDBExportFormat",
+      "type": "DynamoDBExportDataFormat"
+    }
+  ],
+  "parameters": [
+    {
+      "description": "Output S3 folder",
+      "id": "myOutputS3Loc",
+      "type": "AWS::S3::ObjectKey"
+    },
+    {
+      "default": "0.2",
+      "watermark": "Enter value between 0.1-1.0",
+      "description": "DynamoDB read throughput ratio",
+      "id": "myDDBReadThroughputRatio",
+      "type": "Double"
+    },
+    {
+      "description": "DynamoDB table name",
+      "id": "myDDBTableName",
+      "type": "String"
+    },
+    {
+      "description": "DynamoDB table columns",
+      "id": "myDDBTableCols",
+      "type": "String"
+    },
+    {
+      "description": "DynamoDB table column mapping",
+      "id": "myDDBTableColMapping",
+      "type": "String"
+    }
+  ]
+}
