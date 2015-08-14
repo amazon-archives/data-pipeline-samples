@@ -1,0 +1,51 @@
+{
+  "objects": [
+    {
+      "id": "Default",
+      "failureAndRerunMode": "cascade",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myS3LogsPath}",
+      "scheduleType": "cron",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      }
+    },
+    {
+      "type": "Schedule",
+      "id": "DefaultSchedule",
+      "period": "15 Period",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "name": "A_Fresh_NewEMRInstance",
+      "amiVersion": "3.3",
+      "id": "A_Fresh_NewEMRInstance",
+      "type": "EmrCluster"
+    },
+    {
+      "id": "ShellCommandActivity_HelloWorld",
+      "runsOn": {
+        "ref": "A_Fresh_NewEMRInstance"
+      },
+      "type": "ShellCommandActivity",
+      "scriptUri": "s3://data-pipeline-samples/kinesis-apache-access-logs/script-runner.sh",
+      "scriptArgument": "#{myS3Output}"
+    }
+  ],
+  "parameters": [
+    {
+      "id": "myS3LogsPath",
+      "type": "AWS::S3::ObjectKey",
+      "description": "S3 path for pipeline logs."
+    },
+    {
+      "id": "myS3Output",
+      "type": "AWS::S3::ObjectKey",
+      "description": "S3 path for pipeline logs e.g. s3://mybucket/"
+    }
+  ]
+}

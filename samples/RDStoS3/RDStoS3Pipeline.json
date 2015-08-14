@@ -1,0 +1,109 @@
+{
+  "objects": [
+    {
+      "myComment": "This object is used to set default configuration for objects in the pipeline",
+
+      "id": "Default",
+      "failureAndRerunMode": "CASCADE",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myS3LogsPath}",
+      "scheduleType": "cron",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      }
+    },
+    {
+      "myComment": "This object is used to specify the time-based trigger for executing Activities and for provisioning Resources of the pipeline. In this case it is used by the 'Default' object so it will cascade down to all other objects in the pipeline if they do not override it. For this example, we are using it to specify that our pipeline will run immediately upon activation. Also, we are using the 'occurrences' option specify that the pipeline should only be run once. You can have multiple schedules defined in a pipeline.",
+
+      "type": "Schedule",
+      "id": "DefaultSchedule",
+      "occurrences": "1",
+      "period": "1 Day",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "myComment": "This object is used to create an Amazon EC2 Instance that activities in the pipeline can run on.",
+
+      "type": "Ec2Resource",
+      "id": "Ec2Instance",
+      "instanceType": "t1.micro",
+      "securityGroups": "#{myEc2RdsSecurityGrps}",
+      "terminateAfter": "2 Hours",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole"
+    },
+    {
+      "myComment": "This object is a CopyActivity. It is used to define the work that will be done to copy the data from the database to S3.",
+
+      "type": "CopyActivity",
+      "id": "RDStoS3CopyActivity",
+      "output": {
+        "ref": "S3OutputLocation"
+      },
+      "input": {
+        "ref": "SourceRDSTable"
+      },
+      "runsOn": {
+        "ref": "Ec2Instance"
+      }
+    },
+    {
+      "myComment": "This object is a mysql datanode. It is used to represent the database which is the input datanode.",
+
+      "type": "MySqlDataNode",
+      "id": "SourceRDSTable",
+      "connectionString": "#{myRDSConnectStr}",
+      "*password": "#{myRDSPassword}",
+      "table": "#{myRDSTableName}",
+      "selectQuery": "select * from #{table}",
+      "username": "#{myRDSUsername}"
+    },
+    {
+      "myComment": "This object is a S3 datanode. It is used to represent the S3 directory where the data will be stored.",
+
+      "type": "S3DataNode",
+      "id": "S3OutputLocation",
+      "directoryPath": "#{myOutputS3Path}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}"
+    }
+  ],
+  "parameters": [
+    {
+      "id": "myRDSPassword",
+      "type": "String",
+      "description": "RDS MySQL password"
+    },
+    {
+      "id": "myS3LogsPath",
+      "type": "AWS::S3::ObjectKey",
+      "description": "S3 folder for logs"
+    },
+    {
+      "id": "myOutputS3Path",
+      "type": "AWS::S3::ObjectKey",
+      "description": "Output S3 folder"
+    },
+    {
+      "id": "myEc2RdsSecurityGrps",
+      "type": "String",
+      "description": "RDS MySQL security group(s)",
+      "isArray": "true",
+      "optional": "true"
+    },
+    {
+      "id": "myRDSUsername",
+      "type": "String",
+      "description": "RDS MySQL username"
+    },
+    {
+      "id": "myRDSTableName",
+      "type": "String",
+      "description": "RDS MySQL table name"
+    },
+    {
+      "id": "myRDSConnectStr",
+      "type": "String",
+      "description": "RDS MySQL connection string"
+    }
+  ]
+}

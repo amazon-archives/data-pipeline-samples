@@ -1,0 +1,86 @@
+{
+    "objects": [
+        {
+            "occurrences": "1",
+            "period": "1 Day",
+            "name": "RunOnce",
+            "id": "DefaultSchedule",
+            "type": "Schedule",
+            "startAt": "FIRST_ACTIVATION_DATE_TIME",
+	    "maxActiveInstances" : "1"
+        },
+        {
+            "failureAndRerunMode": "CASCADE",
+            "schedule": {
+                "ref": "DefaultSchedule"
+            },
+            "resourceRole": "DataPipelineDefaultResourceRole",
+            "role": "DataPipelineDefaultRole",
+            "pipelineLogUri": "s3://",
+            "scheduleType": "cron",
+            "name": "Default",
+            "id": "Default"
+        },
+        {
+            "maximumRetries": "2",
+            "name": "TableBackupActivity",
+            "step": "s3://dynamodb-emr-us-east-1/emr-ddb-storage-handler/2.1.0/emr-ddb-2.1.0.jar,org.apache.hadoop.dynamodb.tools.DynamoDbExport,#{myOutputS3Loc}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')},#{myDDBTableName},#{myDDBReadThroughputRatio}",
+            "id": "TableBackupActivity",
+            "runsOn": {
+                "ref": "EmrClusterForBackup"
+            },
+            "type": "EmrActivity"
+        },
+        {
+            "bootstrapAction": "s3://elasticmapreduce/bootstrap-actions/configure-hadoop, --yarn-key-value, yarn.nodemanager.resource.memory-mb=12800,--yarn-key-value,yarn.scheduler.minimum-allocation-mb=256,--mapred-key-value,mapreduce.map.memory.mb=500,--mapred-key-value,mapreduce.map.java.opts=-Xmx400M,--mapred-key-value,mapreduce.job.reduce.slowstart.completedmaps=1,--mapred-key-value,mapreduce.map.speculative=false",
+            "name": "EmrClusterForBackup",
+            "amiVersion": "3.8.0",
+            "id": "EmrClusterForBackup",
+            "type": "EmrCluster",
+            "masterInstanceType": "m1.medium",
+            "coreInstanceType": "#{myInstanceType}",
+            "coreInstanceCount": "#{myInstanceCount}",
+	    "terminateAfter" : "12 hours"
+        }
+    ],
+    "parameters": [
+        {
+            "description": "OutputS3folder",
+            "id": "myOutputS3Loc",
+            "type": "AWS::S3::ObjectKey"
+        },
+        {
+            "default": "0.2",
+            "watermark": "Valuebetween0.1-1.0",
+            "description": "DynamoDB Read Throughput Ratio",
+            "id": "myDDBReadThroughputRatio",
+            "type": "Double"
+        },
+        {
+            "description": "DynamoDB Table Name",
+            "id": "myDDBTableName",
+            "type": "String"
+        },
+        {
+            "description": "Instance Type",
+            "id": "myInstanceType",
+            "watermark" : "Use m1.medium if Read Capacity Units for the job <= 900. Else use m3.xlarge",
+            "type": "String",
+            "default": "m3.xlarge"
+        },
+        {
+            "description": "Instance Count",
+	    "watermark" : "(Read Capacity Units / 300) for m1.medium if RCU <= 900. Else (RCU / 1500) for m3.xlarge",
+            "id": "myInstanceCount",
+            "type": "Integer",
+            "default": "1"
+        },
+	{
+	    "description" : "Burst IOPs",
+	    "watermark"   : "Add IOPS to the DDB table by this percent for the duration of the export job",
+            "id"          : "myBurstIOPS",
+            "type"     :    "Double",
+            "default"     : "0.0"
+	}
+    ]
+}
