@@ -26,6 +26,7 @@ If the path is not provided, the script will create the S3 bucket for you.
 ```
 $> cd <GITCLONE>/data-pipeline-samples/samples/RDStoS3
 $> python setup/Setup.py --s3-path [s3://optional/path/to/s3/location]
+```
 
 ## Step 2: Run this sample pipeline using the AWS CLI
 
