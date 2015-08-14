@@ -1,20 +1,17 @@
 {
   "objects": [
     {
-      "schedule": {
-        "ref": "DefaultSchedule"
-      },
       "argument": [
         "-files",
         "s3://elasticmapreduce/samples/wordcount/wordSplitter.py",
         "-mapper",
-        "splitter.py",
+        "wordSplitter.py",
         "-reducer",
         "aggregate",
         "-input",
         "s3://elasticmapreduce/samples/wordcount/input/",
         "-output",
-        "#{myOutputFolder}/#{@scheduledStartTime}"
+        "#{myOutputFolder}/#{@scheduledStartTime}/queue_1/"
       ],
       "maximumRetries": "0",
       "name": "HadoopActivity_1",
@@ -27,20 +24,17 @@
       "hadoopQueue" : "queue_1"
     },
     {
-      "schedule": {
-        "ref": "DefaultSchedule"
-      },
       "argument": [
         "-files",
         "s3://elasticmapreduce/samples/wordcount/wordSplitter.py",
         "-mapper",
-        "splitter.py",
+        "wordSplitter.py",
         "-reducer",
         "aggregate",
         "-input",
         "s3://elasticmapreduce/samples/wordcount/input/",
         "-output",
-        "#{myOutputFolder}/#{@scheduledStartTime}"
+        "#{myOutputFolder}/#{@scheduledStartTime}/queue_2/"
       ],
       "maximumRetries": "0",
       "name": "HadoopActivity_2",
@@ -55,9 +49,6 @@
     {
       "bootstrapAction": "s3://datapipeline-us-east-1/us-east-1/bootstrap-actions/latest/TaskRunner/configure-hadoop,--fair-config-copy-file,#{myFairConfig}",
       "hadoopSchedulerType": "PARALLEL_FAIR_SCHEDULING",
-      "schedule": {
-        "ref": "DefaultSchedule"
-      },
       "name": "DefaultEmrCluster1",
       "coreInstanceCount": "2",
       "coreInstanceType": "m3.xlarge",
