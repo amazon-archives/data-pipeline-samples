@@ -1,0 +1,11 @@
+{
+    "values": 
+    {
+        "myOutputS3Loc"            :   "s3://bucket/directory/",
+        "myDDBReadThroughputRatio" :   "0.5",
+        "myDDBTableName"           :   "dynamo-table-name",
+        "myInstanceType"           :   "m1.medium",
+        "myInstanceCount"          :   "1",
+        "myRegion"                 :   "eu-west-1"
+    }
+}

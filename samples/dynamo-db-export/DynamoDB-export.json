@@ -6,8 +6,7 @@
             "name": "RunOnce",
             "id": "DefaultSchedule",
             "type": "Schedule",
-            "startAt": "FIRST_ACTIVATION_DATE_TIME",
-	    "maxActiveInstances" : "1"
+            "startAt": "FIRST_ACTIVATION_DATE_TIME"
         },
         {
             "failureAndRerunMode": "CASCADE",
@@ -16,10 +15,11 @@
             },
             "resourceRole": "DataPipelineDefaultResourceRole",
             "role": "DataPipelineDefaultRole",
-            "pipelineLogUri": "s3://",
             "scheduleType": "cron",
+            "pipelineLogUri" :  "#{myOutputS3Loc}/logs",
             "name": "Default",
-            "id": "Default"
+            "id": "Default",
+            "maxActiveInstances" : "1"
         },
         {
             "maximumRetries": "2",
@@ -40,7 +40,9 @@
             "masterInstanceType": "m1.medium",
             "coreInstanceType": "#{myInstanceType}",
             "coreInstanceCount": "#{myInstanceCount}",
-	    "terminateAfter" : "12 hours"
+	          "region" : "#{myRegion}",
+	          "terminateAfter" : "12 hours",
+            "keyPair" : "ramsug-test-desktop"
         }
     ],
     "parameters": [
@@ -51,7 +53,7 @@
         },
         {
             "default": "0.2",
-            "watermark": "Entervaluebetween0.1-1.0",
+            "watermark": "Enter value between 0.1 - 1.0",
             "description": "DynamoDB Read Throughput Ratio",
             "id": "myDDBReadThroughputRatio",
             "type": "Double"
@@ -64,23 +66,20 @@
         {
             "description": "Instance Type",
             "id": "myInstanceType",
-            "watermark" : "Use m1.medium if Read Capacity Units for the job <= 900. Else use m3.xlarge",
-            "type": "String",
-            "default": "m3.xlarge"
+            "watermark" : "m1.medium if IOPS <= 900. Else use m3.xlarge",
+            "type": "String"
         },
         {
             "description": "Instance Count",
-	    "watermark" : "(Read Capacity Units / 300) for m1.medium if RCU <= 900. Else (RCU / 1500) for m3.xlarge",
+	    "watermark" : " (IOPS / 300) for m1.medium.(IOPS / 1500) for m3.xlarge",
             "id": "myInstanceCount",
-            "type": "Integer",
-            "default": "1"
+            "type": "Integer"
         },
 	{
-	    "description" : "Burst IOPs",
-	    "watermark"   : "Add IOPS to the DDB table by this percent for the duration of the export job",
-            "id"          : "myBurstIOPS",
-            "type"     :    "Double",
-            "default"     : "0.0"
+	    "description" : "Region",
+	    "watermark"   : "Region of DynamoDB Table/EMR cluster",
+            "id"          : "myRegion",
+            "type"     :    "String"
 	}
     ]
 }
