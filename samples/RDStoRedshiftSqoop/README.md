@@ -21,7 +21,7 @@ $> pip install boto3
 
 ## Step 1: Priming this sample
 
-Run the following commands to give the setup script executable permissions and run the script. The AWS resources that will be created are a Redshift database, RDS MySQL database, and optionally an S3 bucket.
+Run the following commands to run the script. The AWS resources that will be created are a Redshift database, RDS MySQL database, and optionally an S3 bucket.
 
 The script takes an *optional* parameter for an S3 path for staging data between RDS and Redshift. If you choose to provide your own S3 path, the bucket must be in the same region as what is set for your AWS CLI configuration.  In addition, this path cannot be an existing path as Sqoop is expected to create it in order to place the data it extracts from RDS (if the path you provide already exists, the setup process will issue an error message and exit).  Finally, please make sure the S3 bucket has a policy that allows data writes to it.  
 
@@ -33,7 +33,7 @@ $> cd <GITCLONE>/data-pipeline-samples/samples/RDStoRedshiftSqoop
 $> python setup/Setup.py --s3-path [s3://optional/path/to/s3/location]
 ```
 
-## Step 2: Run this sample pipeline using the AWS CLI
+  ## Step 2: Run this sample pipeline using the AWS CLI
 
 ```sh 
   $> aws datapipeline create-pipeline --name rds_to_rs_sqoop_pipeline --unique-id rds_to_rs_sqoop_pipeline
