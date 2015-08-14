@@ -88,7 +88,7 @@ Let the pipeline complete, then check the output S3 bucket for the output csv fi
 
 ```
 $> python setup/Teardown.py --rds-instance-id <rds_instance_id> -s3-path [s3://optional/path/to/s3/bucket/created/by/setup]
-
+```
 
 ## Disclaimer
 
