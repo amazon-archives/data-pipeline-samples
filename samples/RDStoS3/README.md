@@ -2,7 +2,7 @@
 
 ## Overview
 
-This sample shows how to build a pipeline that outputs a mysql table from a RDS database to an S3 bucket.
+This sample shows how to build a pipeline that outputs a MySQL table in csv format from a RDS database to an S3 bucket.
 
 The project provides scripts for setting up the resources for the pipeline, installing the [data set](http://aws.amazon.com/datasets/6468931156960467), and destroying the resources. The project also provides the [pipeline definition file](http://docs.aws.amazon.com/datapipeline/latest/DeveloperGuide/dp-writing-pipeline-definition.html) which is used to create the pipeline and the AWS CLI commands for creating and executing the pipeline. See the instructions below to get started.
 
