@@ -1,0 +1,98 @@
+{
+  "objects": [
+    {
+      "argument": [
+        "-files",
+        "s3://elasticmapreduce/samples/wordcount/wordSplitter.py",
+        "-mapper",
+        "wordSplitter.py",
+        "-reducer",
+        "aggregate",
+        "-input",
+        "s3://elasticmapreduce/samples/wordcount/input/",
+        "-output",
+        "#{myOutputFolder}/#{@scheduledStartTime}/queue_1/"
+      ],
+      "maximumRetries": "0",
+      "name": "HadoopActivity_1",
+      "id": "HadoopActivity_1",
+      "runsOn": {
+        "ref": "EmrClusterId_pmtY0"
+      },
+      "jarUri": "/home/hadoop/contrib/streaming/hadoop-streaming.jar",
+      "type": "HadoopActivity",
+      "hadoopQueue" : "queue_1"
+    },
+    {
+      "argument": [
+        "-files",
+        "s3://elasticmapreduce/samples/wordcount/wordSplitter.py",
+        "-mapper",
+        "wordSplitter.py",
+        "-reducer",
+        "aggregate",
+        "-input",
+        "s3://elasticmapreduce/samples/wordcount/input/",
+        "-output",
+        "#{myOutputFolder}/#{@scheduledStartTime}/queue_2/"
+      ],
+      "maximumRetries": "0",
+      "name": "HadoopActivity_2",
+      "id": "HadoopActivity_2",
+      "runsOn": {
+        "ref": "EmrClusterId_pmtY0"
+      },
+      "jarUri": "/home/hadoop/contrib/streaming/hadoop-streaming.jar",
+      "type": "HadoopActivity",
+      "hadoopQueue" : "queue_2"
+    },
+    {
+      "bootstrapAction": "s3://datapipeline-us-east-1/us-east-1/bootstrap-actions/latest/TaskRunner/configure-hadoop,--fair-config-copy-file,#{myFairConfig}",
+      "hadoopSchedulerType": "PARALLEL_FAIR_SCHEDULING",
+      "name": "DefaultEmrCluster1",
+      "coreInstanceCount": "2",
+      "coreInstanceType": "m3.xlarge",
+      "amiVersion": "3.8.0",
+      "masterInstanceType": "m3.xlarge",
+      "id": "EmrClusterId_pmtY0",
+      "type": "EmrCluster"
+    },
+    {
+      "occurrences": "1",
+      "period": "1 Day",
+      "name": "RunOnce",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myPipelineLogUri}",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    }
+  ],
+  "parameters": [
+     {
+        "id" : "myFairConfig",
+        "type" : "AWS::S3::ObjectKey",
+        "description" : "Please choose the fair scheduler configuration"
+     },
+     {
+       "id" : "myPipelineLogUri",
+       "type" : "AWS::S3::ObjectKey",
+       "description" : "Please specify the logs location"
+     },
+    {
+       "id" : "myOutputFolder",
+       "type" : "AWS::S3::ObjectKey",
+       "description" : "Please specify the word count output location"
+     }
+   ]
+}

@@ -1,0 +1,108 @@
+{
+  "objects": [
+    {
+      "myComment" : "Activity used to run the hive script to export data to CSV",
+      "output": {
+        "ref": "DataNodeId_cnlSW"
+      },
+      "input": {
+        "ref": "DataNodeId_1ERqq"
+      },
+      "name": "TableBackupActivity",
+      "hiveScript": "DROP TABLE IF EXISTS tempHiveTable;\n\nDROP TABLE IF EXISTS s3TempTable;\n\nCREATE EXTERNAL TABLE tempHiveTable (#{myS3ColMapping})\nSTORED BY 'org.apache.hadoop.hive.dynamodb.DynamoDBStorageHandler' \nTBLPROPERTIES (\"dynamodb.table.name\" = \"#{myDDBTableName}\", \"dynamodb.column.mapping\" = \"#{myDDBTableColMapping}\");\n                    \nCREATE EXTERNAL TABLE s3TempTable (#{myS3ColMapping})\nROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LINES TERMINATED BY '\\n'\nLOCATION '#{myOutputS3Loc}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}';\n                    \nINSERT OVERWRITE TABLE s3TempTable SELECT * FROM tempHiveTable;",
+      "runsOn": { "ref" : "EmrClusterForBackup" },
+      "id": "TableBackupActivity",
+      "type": "HiveActivity"
+    },
+    {
+      "period": "1 days",
+      "name": "Every 1 day",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "myComment" : "The DynamoDB table from which we need to export data from",
+      "dataFormat": {
+        "ref": "DDBExportFormat"
+      },
+      "name": "DynamoDB",
+      "id": "DataNodeId_1ERqq",
+      "type": "DynamoDBDataNode",
+      "tableName": "#{myDDBTableName}"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myLogUri}",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "name": "EmrClusterForBackup",
+      "coreInstanceType": "m1.medium",
+      "coreInstanceCount": "1",
+      "masterInstanceType": "m1.medium",
+      "amiVersion": "3.3.2",
+      "id": "EmrClusterForBackup",
+      "type": "EmrCluster",
+      "terminateAfter": "2 Hours"
+    },
+    {
+      "myComment" : "The S3 path to which we export data to",
+      "directoryPath": "#{myOutputS3Loc}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}/",
+      "dataFormat": {
+        "ref": "DataFormatId_xqWRk"
+      },
+      "name": "S3DataNode",
+      "id": "DataNodeId_cnlSW",
+      "type": "S3DataNode"
+    },
+    {
+      "myComment" : "Format for the S3 Path",
+      "name": "DefaultDataFormat1",
+      "column": "not_used STRING",
+      "id": "DataFormatId_xqWRk",
+      "type": "CSV"
+    },
+    {
+      "myComment" : "Format for the DynamoDB table",
+      "name": "DDBExportFormat",
+      "id": "DDBExportFormat",
+      "column": "not_used STRING",
+      "type": "DynamoDBExportDataFormat"
+    }
+  ],
+  "parameters": [
+    {
+      "description": "Output S3 folder",
+      "id": "myOutputS3Loc",
+      "type": "AWS::S3::ObjectKey"
+    },
+    {
+      "description": "DynamoDB table name",
+      "id": "myDDBTableName",
+      "type": "String"
+    },
+    {
+      "description": "S3 to DynamoDB Column Mapping",
+      "id": "myDDBTableColMapping",
+      "type": "String"
+    },
+    {
+      "description": "S3 Column Mappings",
+      "id": "myS3ColMapping",
+      "type": "String"
+    },
+    {
+      "description": "DataPipeline Log Uri",
+      "id": "myLogUri",
+      "type": "String"
+    }
+  ]
+}

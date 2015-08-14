@@ -1,0 +1,91 @@
+{
+  "objects": [
+    {
+      "name": "EmrClusterForBackup",
+      "coreInstanceType": "m1.medium",
+      "coreInstanceCount": "1",
+      "masterInstanceType": "m1.medium",
+      "amiVersion": "3.3.2",
+      "id": "EmrClusterForBackup",
+      "type": "EmrCluster",
+      "terminateAfter": "2 Hours"
+    },
+    {
+      "period": "1 days",
+      "name": "Every 1 day",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "name": "DefaultDataFormat1",
+      "column": "not_used STRING",
+      "id": "DataFormatId_xqWRk",
+      "myComment": "Format for the S3 Path",
+      "type": "CSV"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myLogUri}",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "name": "ShellCommandActivityCp",
+      "runsOn": { "ref" : "EmrClusterForBackup" },
+      "id": "ActivityId_zrRQz",
+      "type": "ShellCommandActivity",
+      "command": "aws s3 cp s3://data-pipeline-samples/dynamodbxml/input/serde.xml /home/hadoop/serde-#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}.xml"
+    },
+    {
+      "dataFormat": {
+        "ref": "DDBExportFormat"
+      },
+      "name": "DynamoDB",
+      "id": "DataNodeId_1ERqq",
+      "type": "DynamoDBDataNode",
+      "myComment": "The DynamoDB table from which we need to export data from",
+      "tableName": "customers"
+    },
+    {
+      "column": "not_used STRING",
+      "name": "DDBExportFormat",
+      "id": "DDBExportFormat",
+      "type": "DynamoDBExportDataFormat",
+      "myComment": "Format for the DynamoDB table"
+    },
+    {
+      "directoryPath": "s3://data-pipeline-samples/dynamodbxml/input",
+      "dataFormat": {
+        "ref": "DataFormatId_xqWRk"
+      },
+      "name": "S3DataNode",
+      "id": "DataNodeId_cnlSW",
+      "type": "S3DataNode",
+      "myComment": "The S3 path to which we export data to"
+    },
+    {
+      "output": {
+        "ref": "DataNodeId_1ERqq"
+      },
+      "input": {
+        "ref": "DataNodeId_cnlSW"
+      },
+      "dependsOn": {
+        "ref": "ActivityId_zrRQz"
+      },
+      "name": "TableBackupActivity",
+      "hiveScript": "add jar s3://data-pipeline-samples/dynamodbxml/hivexmlserde-1.0.5.3.jar;\nDROP TABLE IF EXISTS xml_bank;\nCREATE EXTERNAL TABLE xml_bank(customer_id STRING, income string, demographics string, financial string)\nROW FORMAT SERDE 'com.ibm.spss.hive.serde2.xml.XmlSerDe'\nWITH SERDEPROPERTIES (\n\"column.xpath.customer_id\"=\"/record/@customer_id\",\n\"column.xpath.income\"=\"/record/income/text()\",\n\"column.xpath.demographics\"=\"/record/demographics/*\",\n\"column.xpath.financial\"=\"/record/financial/*\"\n)\nSTORED AS\nINPUTFORMAT 'com.ibm.spss.hive.serde2.xml.XmlInputFormat'\nOUTPUTFORMAT 'org.apache.hadoop.hive.ql.io.IgnoreKeyTextOutputFormat'\nTBLPROPERTIES (\n\"xmlinput.start\"=\"<record customer\",\n\"xmlinput.end\"=\"</record>\"\n);\nLOAD DATA LOCAL inpath '/home/hadoop/serde-#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}.xml' overwrite into table xml_bank;\nDROP TABLE IF EXISTS hiveTableName;\nCREATE EXTERNAL TABLE hiveTableName (col1 string, col2 string, col3 string, col4 string)\nSTORED BY 'org.apache.hadoop.hive.dynamodb.DynamoDBStorageHandler' \nTBLPROPERTIES (\"dynamodb.table.name\" = \"customers\", \n\"dynamodb.column.mapping\" = \"col1:customer_id,col2:income,col3:demographics,col4:financial\");  \nINSERT OVERWRITE TABLE hiveTableName SELECT * FROM xml_bank;",
+      "runsOn": { "ref" : "EmrClusterForBackup" },
+      "id": "TableBackupActivity",
+      "type": "HiveActivity",
+      "myComment": "Activity used to run the hive script to export data to CSV"
+    }
+  ]
+}
