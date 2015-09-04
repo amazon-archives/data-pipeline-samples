@@ -9,7 +9,7 @@ After running the TeraSort,it stores the result of daily execution in S3 along t
 
 
 The python driver (optional) will create and activate a pipeline from the pipeline template JSON.
-To use the python driver is optional. You could skip steps 1,2,3 and use AWS CLI or Console instead.
+The python driver is optional. You could skip the driver and use AWS CLI or Console instead.
 The instructions at https://github.com/awslabs/data-pipeline-samples tell you how to create, setup, and activate a pipeline. 
 
 ##1. Ensure python 2.7 is installed.
@@ -25,7 +25,7 @@ The instructions at https://github.com/awslabs/data-pipeline-samples tell you ho
  $> setup/sudo pip install sh
 ```
 
-##4. Edit the template (as needed). Example: Changing the EMR Cluster AMI, Bootstrap actions, etc.
+##4. Edit the template (as needed). Example: Changing the EMR Cluster AMI, Bootstrap actions to configure memory, etc.
 
 ##5. In the template, provide the value for the parameter: "myPathToLogFiles".
     This is the folder under which DataPipeline publishes the log files.
@@ -36,7 +36,7 @@ The instructions at https://github.com/awslabs/data-pipeline-samples tell you ho
     Example: "s3://aravind-terasort/test-results"    
     
 
-##7. Create, put and activate the pipeline by running    
+##7. Create, put and activate the pipeline by running the following driver script:    
 
 ```sh
  $> python driver/run_template.py -t TeraSortHadoopBenchmark.json
