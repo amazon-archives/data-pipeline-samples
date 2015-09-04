@@ -25,7 +25,13 @@ The instructions at https://github.com/awslabs/data-pipeline-samples tell you ho
  $> setup/sudo pip install sh
 ```
 
-##4. Edit the template (as needed). Example: Changing the EMR Cluster AMI, Bootstrap actions to configure memory, etc.
+##4. Edit the template (as needed).
+```sh
+ Example: Changing the EMR Cluster AMI. AMI version used in the template is 3.9.0.
+ Bootstrap actions to configure memory, etc. Sample configuration is specified in the template.
+ If the default configuration is to be used, remove the bootstrapAction field.
+```
+
 
 ##5. In the template, provide the value for the parameter: "myPathToLogFiles".
     This is the folder under which DataPipeline publishes the log files.
