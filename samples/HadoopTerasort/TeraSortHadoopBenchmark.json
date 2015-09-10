@@ -1,0 +1,128 @@
+{
+  "metadata": {
+    "templateName": "Hadoop TeraSort 10GB Benchmark DataPipeline Script",
+    "templateDescription": "Hadoop TeraSort 10GB Benchmark DataPipeline Script. The purpose of TeraSort is to test the CPU/Memory power of the cluster."
+  },
+  "objects": [
+    {
+      "myComment": "This object is used to set default configuration for objects in the pipeline",
+
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DailySchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myPathToLogFiles}",
+      "scheduleType": "cron",
+      "id": "Default"
+    },
+    {
+      "myComment": "This object is used to specify the time-based trigger for executing Activities and for provisioning Resources of the pipeline. In this case it is used by the 'Default' object so it will cascade down to all other objects in the pipeline if they do not override it. For this example, we use it to specify that our pipeline should execute immediately upon activation. Also, we are using the 'occurrences' option to specify that the pipeline should be run only once. Note: You can have multiple schedules defined in a pipeline.",
+
+      "period": "1 Day",
+      "name": "Every Day",
+      "id": "DailySchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "myComment": "TeraGen will run map tasks to generate the data and will not run any reduce tasks. Its only purpose is to generate the 10TB of random data ",
+
+      "id": "TeraGen-10GB",
+      "type": "HadoopActivity",
+      "jarUri": "s3://datapipeline-us-east-1/sample-scripts/HadoopTeraSort/hadoop-examples-1.0.3.jar",
+      "argument": [
+        "teragen",
+        "100000000",
+        "/mnt/var/terasort/10GB/input"
+      ],
+      "runsOn": {
+        "ref": "EmrCluster"
+      }
+    },
+    {
+      "myComment": "Uses map reduce to sort the data.",
+
+      "id": "TeraSort",
+      "dependsOn": {
+        "ref": "TeraGen-10GB"
+      },
+      "type": "HadoopActivity",
+      "jarUri": "s3://datapipeline-us-east-1/sample-scripts/HadoopTeraSort/hadoop-examples-1.0.3.jar",
+      "argument": [
+        "terasort",
+        "/mnt/var/terasort/10GB/input",
+        "/mnt/var/terasort/10GB/output/"
+      ],
+      "runsOn": {
+        "ref": "EmrCluster"
+      }
+    },
+    {
+      "myComment": "Reads the output data and ensures that each key is less then the next key in the entire dataset.",
+
+      "id": "TeraValidate",
+      "dependsOn": {
+        "ref": "TeraSort"
+      },
+      "type": "HadoopActivity",
+      "jarUri": "s3://datapipeline-us-east-1/sample-scripts/HadoopTeraSort/hadoop-examples-1.0.3.jar",
+      "argument": [
+        "teravalidate",
+        "/mnt/var/terasort/10GB/output",
+        "/mnt/var/terasort/10GB/validate"
+      ],
+      "runsOn": {
+        "ref": "EmrCluster"
+      }
+    },
+    {
+      "myComment": "Query the hadoop job history and publish the benchmark JHIST results",
+
+      "id": "ProcessJHIST",
+      "dependsOn": {
+        "ref": "TeraValidate"
+      },
+      "type": "ShellCommandActivity",
+      "scriptArgument": "#{myPathToTerasortResults}",
+      "scriptUri": "s3://datapipeline-us-east-1/sample-scripts/HadoopTeraSort/process-jhist.sh",
+      "runsOn": {
+        "ref": "EmrCluster"
+      }
+    },
+    {
+      "myComment": "Hadoop activities run on this cluster",
+
+      "id": "EmrCluster",
+      "enableDebugging": "true",
+      "coreInstanceCount": "2",
+      "coreInstanceType": "m3.xlarge",
+      "amiVersion": "3.9.0",
+      "masterInstanceType": "m3.xlarge",
+      "type": "EmrCluster",
+      "bootstrapAction" : ["s3://elasticmapreduce/bootstrap-actions/configure-hadoop, --yarn-key-value, yarn.nodemanager.resource.memory-mb=11520,--yarn-key-value,yarn.scheduler.minimum-allocation-mb=1440,--mapred-key-value,mapreduce.map.memory.mb=1440"],
+      "terminateAfter": "10 Days"
+    }
+  ],
+  "parameters": [
+    {
+      "id": "myPathToLogFiles",
+      "type": "AWS::S3::ObjectKey",
+      "description": "Path to pipeline logs",
+      "default": "s3://aravind-terasort/dpl-logging/",
+      "watermark": "s3://aravind-terasort/dpl-logging/"
+    },
+    {
+      "id": "myPathToTerasortResults",
+      "type": "AWS::S3::ObjectKey",
+      "description": "Path to Terasort Results",
+      "default": "s3://aravind-terasort/test-results",
+      "watermark": "s3://aravind-terasort/test-results"
+    }
+  ],
+  "values": {
+    "myPathToLogFiles": "s3://aravind-terasort/dpl-logging/",
+    "myPathToTerasortResults": "s3://aravind-terasort/test-results"
+  }
+}
