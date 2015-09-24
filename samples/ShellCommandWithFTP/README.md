@@ -14,7 +14,7 @@ You must have the AWS CLI and default IAM roles setup in order to run the sample
 
 You must also provide the S3Path of a S3 bucket with write permissions. See [here](http://docs.aws.amazon.com/AmazonS3/latest/UG/CreatingaBucket.html) for instructions on how to create an S3 bucket.
 
-You must also upload *ftpcommands* to your s3 input bucket and the data file to your ftp server.
+You must also upload *ftpcommands* to your s3 input bucket and the *data* file from this file to your ftp server.
 
 ## Run this sample pipeline using the AWS CLI
 
