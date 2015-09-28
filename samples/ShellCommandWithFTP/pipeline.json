@@ -13,7 +13,7 @@
       "schedule": {
         "ref": "DefaultSchedule"
       }
-    }
+    },
     {
       "myComment": "This object is used to specify the time-based trigger for executing Activities and for provisioning Resources of the pipeline. 
       In this case it is used by the 'Default' object so it will cascade down to all other objects in the pipeline if they do not override it. 
