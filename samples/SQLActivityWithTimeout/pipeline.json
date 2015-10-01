@@ -1,0 +1,85 @@
+{
+  "objects": [
+    {
+      "myComment": "This object is used to set default configuration for objects in the pipeline",
+
+      "id": "Default",
+      "failureAndRerunMode": "CASCADE",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myS3LogsPath}",
+      "scheduleType": "cron",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      }
+    },
+    {
+      "myComment": "This object is used to specify the time-based trigger for executing Activities and for provisioning Resources of the pipeline. In this case it is used by the 'Default' object so it will cascade down to all other objects in the pipeline if they do not override it.",
+
+      "type": "Schedule",
+      "id": "DefaultSchedule",
+      "occurrences": "1",
+      "period": "1 Day",
+      "name": "RunOnce",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "myComment": "This object is a SqlActivity which can be used to query data from a relational database.",
+
+      "type": "SqlActivity",
+      "id": "ActivityId_wRpKi",
+      "name": "DefaultActivity1",
+      "database": {
+        "ref": "DatabaseId_rAZmM"
+      },
+      "reportProgressTimeout": "1 Hour",
+      "attemptTimeout": "1 Hour",
+      "scriptUri": "s3://data-pipeline-samples/sqlactivity/script.sql",
+      "runsOn": {
+        "ref": "ResourceId_nEzqN"
+      }
+    },
+    {
+      "myComment": "This object defines the RDS Datbase resource that the SQL query will run on.",
+
+      "type": "RdsDatabase",
+      "id": "DatabaseId_rAZmM",
+      "rdsInstanceId" : "#{myRDSId}",
+      "name": "DefaultDatabase1",
+      "username": "#{myRDSUsername}",
+      "*password": "#{myRDSPassword}"
+    },
+    {
+      "myComment": "This object defines the EC2 resource ",
+
+      "type": "Ec2Resource",
+      "id": "ResourceId_nEzqN",
+      "name": "DefaultResource1",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "terminateAfter":  "2 Hours"
+    }
+  ],
+  "parameters": [
+    {
+      "type": "String",
+      "id": "myRDSId",
+      "description": "RDS instance id"
+    },
+    {
+      "type": "String",
+      "id": "myRDSUsername",
+      "description": "RDS MySQL username"
+    },
+    {
+      "type": "String",
+      "id": "myRDSPassword",
+      "description": "RDS MySQL password"
+    },
+    {
+      "type": "AWS::S3::ObjectKey",
+      "id": "myS3LogsPath",
+      "description": "S3 folder for logs"
+    }
+  ]
+}

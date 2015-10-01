@@ -1,0 +1,229 @@
+{
+  "objects": [
+    {
+      "name": "RunOnce",
+      "id": "DefaultSchedule",
+      "fields": [
+        {
+          "key": "type",
+          "stringValue": "Schedule"
+        },
+        {
+          "key": "occurrences",
+          "stringValue": "1"
+        },
+        {
+          "key": "period",
+          "stringValue": "1 Day"
+        },
+        {
+          "key": "startAt",
+          "stringValue": "FIRST_ACTIVATION_DATE_TIME"
+        }
+      ]
+    },
+    {
+      "name": "Default",
+      "id": "Default",
+      "fields": [
+        {
+          "key": "schedule",
+          "refValue": "DefaultSchedule"
+        },
+        {
+          "key": "resourceRole",
+          "stringValue": "DataPipelineDefaultResourceRole"
+        },
+        {
+          "key": "role",
+          "stringValue": "DataPipelineDefaultRole"
+        },
+        {
+          "key": "pipelineLogUri",
+          "stringValue": "s3://data-pipeline-samples/sqoop-activity"
+        },
+        {
+          "key": "scheduleType",
+          "stringValue": "cron"
+        }
+      ]
+    },
+    {
+      "name": "SqoopActivity",
+      "id": "ActivityId_6vvjv",
+      "fields": [
+        {
+          "key": "type",
+          "stringValue": "EmrActivity"
+        },
+        {
+          "key": "schedule",
+          "refValue": "DefaultSchedule"
+        },
+        {
+          "key": "runsOn",
+          "refValue": "EmrClusterId_itsxt"
+        },
+        {
+          "key": "step",
+          "stringValue": "s3://elasticmapreduce/libs/script-runner/script-runner.jar,s3://data-pipeline-samples/sqoop-activity/mysql_create_table.sh,#{myRdsEndpoint},#{myRdsDatabase},#{myRdsDbUsername},#{myRdsDbPassword}"
+        },
+        {
+          "key": "step",
+          "stringValue": "s3://elasticmapreduce/libs/script-runner/script-runner.jar,s3://data-pipeline-samples/sqoop-activity/run_sqoop_job.sh,export,#{myRdsEndpoint},#{myRdsDatabase},#{myRdsTable},#{myS3Input},#{myRdsDbUsername},#{myRdsDbPassword}"
+        }
+      ]
+    },
+    {
+      "name": "DefaultEmrCluster1",
+      "id": "EmrClusterId_itsxt",
+      "fields": [
+        {
+          "key": "schedule",
+          "refValue": "DefaultSchedule"
+        },
+        {
+          "key": "bootstrapAction",
+          "stringValue": "s3://data-pipeline-samples/sqoop-activity/install_sqoop_ba.sh"
+        },
+        {
+          "key": "maximumRetries",
+          "stringValue": "0"
+        },
+        {
+          "key": "amiVersion",
+          "stringValue": "3.8.0"
+        },
+        {
+          "key": "masterInstanceType",
+          "stringValue": "m3.xlarge"
+        },
+        {
+          "key": "type",
+          "stringValue": "EmrCluster"
+        },
+        {
+          "key": "terminateAfter",
+          "stringValue": "1 Day"
+        }
+      ]
+    }
+  ],
+  "parameters": [
+    {
+      "id": "myRdsEndpoint",
+      "attributes":
+      [
+        {
+          "key": "description",
+          "stringValue": "RDS hostname"
+        },
+        {
+          "key": "type",
+          "stringValue": "String"
+        }
+      ]
+    },
+    {
+      "id": "myRdsDatabase",
+      "attributes":
+      [
+        {
+          "key": "description",
+          "stringValue": "RDS database"
+        },
+        {
+          "key": "type",
+          "stringValue": "String"
+        }
+      ]
+    },
+    {
+      "id": "myRdsTable",
+      "attributes":
+      [
+        {
+          "key": "description",
+          "stringValue": "RDS table"
+        },
+        {
+          "key": "type",
+          "stringValue": "String"
+        }
+      ]
+    },
+    {
+      "id": "myS3Input",
+      "attributes":
+      [
+        {
+          "key": "description",
+          "stringValue": "S3 input key"
+        },
+        {
+          "key": "type",
+          "stringValue": "AWS::S3::ObjectKey"
+        }
+      ]
+    },
+    {
+      "id": "myRdsDbUsername",
+      "attributes":
+      [
+        {
+          "key": "description",
+          "stringValue": "RDS database username"
+        },
+        {
+          "key": "type",
+          "stringValue": "String"
+        }
+      ]
+    },
+    {
+      "id": "myRdsDbPassword",
+      "attributes":
+      [
+        {
+          "key": "description",
+          "stringValue": "RDS database password"
+        },
+        {
+          "key": "type",
+          "stringValue": "String"
+        }
+      ]
+    }
+  ],
+  "parameterValues": [
+    {
+        "id": "myRdsEndpoint",
+        "stringValue": ""
+    },
+    {
+        "id": "myRdsDatabase",
+        "stringValue": "millionsongs"
+    },
+    {
+        "id": "myRdsTable",
+        "stringValue": "songs"
+    },
+    {
+        "id": "myS3Input",
+        "stringValue":
+            "s3://data-pipeline-samples/sqoop-activity/sqoop-sample-input.csv"
+    },
+    {
+        "id": "myRdsDbUsername",
+        "stringValue": "dplcustomer"
+    },
+    {
+        "id": "myRdsDbPassword",
+        "stringValue": "Dplcustomer1"
+    },
+    {
+        "id": "myRdsTableCreate",
+        "stringValue": "create table songs (track_id varchar(512) primary key not null title text, song_id text, release_name text, artist_id text, artist_mbid text, artist_name text, duration float, artist_familiarity float, artist_hotness float, year integer)"
+    }
+  ]
+}
