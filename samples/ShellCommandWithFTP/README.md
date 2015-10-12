@@ -1,8 +1,8 @@
-# Data Pipeline ShellCommandWithFTP Sample
+# Data Pipeline ShellCommandWith (S)FTP Sample
 
 ## Overview
 
-This sample shows how to build a Shell Command Activity pipeline that uses a ftp server to get files. The sample relies 
+This sample shows how to build a Shell Command Activity pipeline that uses a (s)ftp server to get files. The sample relies 
 on having public key authentication configured to access the SFTP server. The samples also uses an input and output s3
 bucket for storing input scripts and output results of the shell command.
 
