@@ -7,7 +7,7 @@
       "name": "MyDynamoData",
       "id": "DynamoDBDataNodeId_PK5Iq",
       "type": "DynamoDBDataNode",
-      "tableName": “ddbtable
+      "tableName": "ddbtable"
     },
     {
       "output": {
@@ -98,7 +98,7 @@
       "schedule": {
         "ref": "ScheduleId_scTIc"
       },
-      "directoryPath": "s3://bucket/backup,
+      "directoryPath": "s3://bucket/backup",
       "name": "MyS3Data",
       "id": "S3DataNodeId_3cbrR",
       "type": "S3DataNode"
