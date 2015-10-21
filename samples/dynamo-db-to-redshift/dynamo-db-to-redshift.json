@@ -1,0 +1,81 @@
+{
+  "objects": [
+    {
+      "id": "DefaultSchedule1",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME",
+      "name": "DefaultSchedule1",
+      "type": "Schedule",
+      "occurrences" : "1",
+      "period": "1 day"
+    },
+    {
+      "id": "DefaultRedshiftDatabase1",
+      "region": "eu-west-1",
+      "databaseName": "database_name",
+      "username": "%Redshift DB Username%",
+      "name": "DefaultRedshiftDatabase1",
+      "*password": "%Redshift DB Password%",
+      "type": "RedshiftDatabase",
+      "clusterId": "%Redshift DB Cluster ID%"
+    },
+    {
+      "id": "DefaultDynamoDBDataNode1",
+      "region": "us-east-1",
+      "schedule": {
+        "ref": "DefaultSchedule1"
+      },
+      "tableName": "%Dynamo DB Table Name%",
+      "name": "DefaultDynamoDBDataNode1",
+      "type": "DynamoDBDataNode"
+    },
+    {
+      "id": "DefaultRedshiftCopyActivity1",
+      "input": {
+        "ref": "DefaultDynamoDBDataNode1"
+      },
+      "schedule": {
+        "ref": "DefaultSchedule1"
+      },
+      "insertMode": "KEEP_EXISTING",
+      "name": "DefaultRedshiftCopyActivity1",
+      "runsOn": {
+        "ref": "DefaultEc2Resource1"
+      },
+      "output": {
+        "ref": "DefaultRedshiftDataNode1"
+      },
+      "type": "RedshiftCopyActivity"
+    },
+    {
+      "id": "DefaultRedshiftDataNode1",
+      "schedule": {
+        "ref": "DefaultSchedule1"
+      },
+      "tableName": "%Redshift DB Table Name%",
+      "name": "DefaultRedshiftDataNode1",
+      "type": "RedshiftDataNode",
+      "database": {
+        "ref": "DefaultRedshiftDatabase1"
+      }
+    },
+    {
+      "id": "Default",
+      "scheduleType": "CRON",
+      "failureAndRerunMode": "CASCADE",
+      "name": "Default",
+      "role": "DataPipelineDefaultRole",
+      "resourceRole": "DataPipelineDefaultResourceRole"
+    },
+      {
+        "id"  : "DefaultEc2Resource1", 
+        "name": "DefaultEc2Resource1",
+        "type": "Ec2Resource",
+        "terminateAfter": "45 minutes",
+        "actionOnTaskFailure": "terminate",
+        "actionOnResourceFailure": "retrynone",
+        "maximumRetries": "0",
+        "schedule": { "ref": "DefaultSchedule1" },
+        "logUri": "s3://logbucket/"
+      }
+  ]
+}

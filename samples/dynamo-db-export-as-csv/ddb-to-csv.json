@@ -1,0 +1,108 @@
+{
+  "objects": [
+    {
+      "schedule": {
+        "ref": "ScheduleId_scTIc"
+      },
+      "name": "MyDynamoData",
+      "id": "DynamoDBDataNodeId_PK5Iq",
+      "type": "DynamoDBDataNode",
+      "tableName": "ddbtable"
+    },
+    {
+      "output": {
+        "ref": "DataNodeId_KQofW"
+      },
+      "input": {
+        "ref": "S3DataNodeId_3cbrR"
+      },
+      "schedule": {
+        "ref": "ScheduleId_scTIc"
+      },
+      "dependsOn": {
+        "ref": "EmrActivityId_bxl6C"
+      },
+      "stage": "false",
+      "name": "DDBExporttoCSV",
+      "hiveScript": "drop table if exists raw_data;\n\nCREATE EXTERNAL TABLE raw_data(accountId string, name string, description string)\nROW FORMAT SERDE 'org.apache.hadoop.hive.dynamodb.DynamoDBExportSerDe'\nLOCATION \"#{input.directoryPath}/#{format(@scheduledStartTime,'YYYY-MM-dd_hh.mm')}\"\nTBLPROPERTIES (\"dynamodb.column.mapping\"=\"accountId:accountId,name:name,description:description\");\n\ndrop table if exists csv_data;\ncreate table csv_data (accountId string, name string, description string)\nrow format delimited\nfields terminated by ',' lines terminated by '\\n'\nlocation '#{output.directoryPath}/';\n\ninsert overwrite table csv_data select * from raw_data;",
+      "runsOn": {
+        "ref": "EmrClusterId_auxJq"
+      },
+      "id": "ActivityId_IUO66",
+      "type": "HiveActivity"
+    },
+    {
+      "occurrences": "1",
+      "period": "1 Day",
+      "name": "ExportSchedule",
+      "id": "ScheduleId_scTIc",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "schedule": {
+        "ref": "ScheduleId_scTIc"
+      },
+      "directoryPath": "s3://bucket/data_as_csv",
+      "name": "CSVData",
+      "id": "DataNodeId_KQofW",
+      "type": "S3DataNode"
+    },
+    {
+      "resizeClusterMaxInstances": "50",
+      "maximumRetries": "0",
+      "runsOn": {
+        "ref": "EmrClusterId_auxJq"
+      },
+      "type": "EmrActivity",
+      "output": {
+        "ref": "S3DataNodeId_3cbrR"
+      },
+      "schedule": {
+        "ref": "ScheduleId_scTIc"
+      },
+      "input": {
+        "ref": "DynamoDBDataNodeId_PK5Iq"
+      },
+      "attemptTimeout": "24 Hours",
+      "myDynamoDBReadThroughputRatio": "1.0",
+      "name": "MyExportJob",
+      "step": "s3://elasticmapreduce/libs/script-runner/script-runner.jar,s3://elasticmapreduce/libs/hive/hive-script,--run-hive-script,--hive-versions,latest,--args,-f,s3://elasticmapreduce/libs/hive/dynamodb/exportDynamoDBTableToS3,-d,DYNAMODB_INPUT_TABLE=#{input.tableName},-d,S3_OUTPUT_BUCKET=#{output.directoryPath}/#{format(@scheduledStartTime,'YYYY-MM-dd_hh.mm')},-d,DYNAMODB_READ_PERCENT=#{myDynamoDBReadThroughputRatio},-d,DYNAMODB_ENDPOINT=dynamodb.us-east-1.amazonaws.com",
+      "id": "EmrActivityId_bxl6C",
+      "resizeClusterBeforeRunning": "true"
+    },
+    {
+      "emrLogUri": "s3://bucket/data_pipeline_logs/export/us-east-1/ddbtable/#{format(@scheduledStartTime,'YYYY-MM-dd_hh.mm')}",
+      "schedule": {
+        "ref": "ScheduleId_scTIc"
+      },
+      "installHive": "latest",
+      "enableDebugging": "true",
+      "name": "ExportCluster",
+      "coreInstanceType": "m1.medium",
+      "coreInstanceCount": "1",
+      "id": "EmrClusterId_auxJq",
+      "masterInstanceType": "m1.medium",
+      "amiVersion": "3.3.2",
+      "type": "EmrCluster"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "scheduleType": "CRON",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "schedule": {
+        "ref": "ScheduleId_scTIc"
+      },
+      "directoryPath": "s3://bucket/backup",
+      "name": "MyS3Data",
+      "id": "S3DataNodeId_3cbrR",
+      "type": "S3DataNode"
+    }
+  ],
+  "parameters": []
+}
