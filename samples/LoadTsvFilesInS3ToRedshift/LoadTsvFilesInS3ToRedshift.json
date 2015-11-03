@@ -1,0 +1,137 @@
+{
+  "objects": [
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "s3://insert-here-log-location-for-DPL",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "occurrences": "1",
+      "period": "1 Day",
+      "name": "RunOnce",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "output": {
+        "ref": "DestRedshiftTable"
+      },
+      "input": {
+        "ref": "Input_S3_Tsv_Files"
+      },
+      "name": "ExportS3ToRedshift",
+      "runsOn": {
+        "ref": "Ec2Instance"
+      },
+      "id": "RedshiftLoadActivity",
+      "type": "RedshiftCopyActivity",
+      "insertMode": "OVERWRITE_EXISTING",
+      "commandOptions": ["EMPTYASNULL", "IGNOREBLANKLINES"]
+    },
+    {
+      "connectionString": "#{myRedshiftJdbcConnectStr}",
+      "databaseName": "#{myRedshiftDbName}",
+      "*password": "#{myRedshiftPassword}",
+      "name": "RedshiftCluster",
+      "id": "RedshiftCluster",
+      "type": "RedshiftDatabase",
+      "username": "#{myRedshiftUsername}"
+    },
+    {
+      "filePath": "#{myInputTsvFilesS3Loc}",
+      "name": "Input_S3_Tsv_Files",
+      "id": "Input_S3_Tsv_Files",
+      "dataFormat": {
+        "ref": "DataFormatId_tsv"
+      },
+      "type": "S3DataNode"
+    },
+    {
+      "securityGroupIds": "#{myRedshiftSecurityGrpIds}",
+      "instanceType": "m3.xlarge",
+      "name": "Ec2Instance",
+      "associatePublicIpAddress": "true",
+      "id": "Ec2Instance",
+      "type": "Ec2Resource",
+      "region": "us-east-1",
+      "terminateAfter": "10 Hours",
+      "availabilityZone": "us-east-1a"
+    },
+    {
+      "database": {
+        "ref": "RedshiftCluster"
+      },
+      "name": "DestRedshiftTable",
+      "id": "DestRedshiftTable",
+      "schemaName": "schemaNameInRedshift",
+      "type": "RedshiftDataNode",
+      "tableName": "DestRedshiftTableName"
+    },
+    {
+      "name": "S3TRDataFormat",
+      "id": "DataFormatId_tsv",
+      "type": "TSV"
+    }
+  ],
+  "parameters": [
+    {
+      "description": "Redshift password",
+      "id": "*myRedshiftPassword",
+      "type": "String"
+    },
+    {
+      "description": "Redshift database name",
+      "id": "myRedshiftDbName",
+      "type": "String"
+    },
+    {
+      "watermark": "security group id. E.g.,",
+      "helpText": "The names of one or more security groups that are assigned to the Redshift cluster.",
+      "description": "Security group Id(s)",
+      "isArray": "true",
+      "id": "myRedshiftSecurityGrpIds",
+      "type": "String"
+    },
+    {
+      "description": "Redshift username",
+      "id": "myRedshiftUsername",
+      "type": "String"
+    },
+    {
+      "allowedValues": "OVERWRITE_EXISTING",
+      "default": "OVERWRITE_EXISTING",
+      "helpLink": "https://docs.aws.amazon.com/console/datapipeline/redshiftcopyactivity",
+      "helpText": "Determines how to handle pre-existing data in the target table that overlaps with rows in the data to be loaded.",
+      "description": "Table insert mode",
+      "id": "myInsertMode",
+      "type": "String"
+    },
+    {
+      "helpText": "The name of an existing table or a new table that will be created based on the create table SQL query parameter below.",
+      "description": "Redshift table name",
+      "id": "myRedshiftTableName",
+      "type": "String"
+    },
+    {
+      "helpText": "The S3 folder where one or more tsv input files are located.",
+      "description": "Input S3 folder",
+      "id": "myInputTsvFilesS3Loc",
+      "type": "AWS::S3::ObjectKey",
+      "watermark" : "s3://tsv-files-insert-loc/2015-10-27-01-00-29"
+    },
+    {
+      "watermark": "jdbc:postgresql://endpoint:port/database?tcpKeepAlive=true",
+      "description": "Redshift JDBC connection string",
+      "id": "myRedshiftJdbcConnectStr",
+      "type": "String"
+    }
+  ]
+}
