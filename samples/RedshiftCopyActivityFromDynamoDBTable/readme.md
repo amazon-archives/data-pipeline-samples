@@ -1,4 +1,4 @@
-#RedshiftCopyActivity Sample - https://docs.aws.amazon.com/datapipeline/latest/DeveloperGuide/dp-object-redshiftcopyactivity.html
+#RedshiftCopyActivityFromDynamoDBTable Sample 
 
 ##Running this sample
 
@@ -40,3 +40,7 @@
 #   2.  ResourceId_idL0Y                                    2015-11-06T23:52:04  CREATING               
 #       @ResourceId_idL0Y_2015-11-06T23:52:04               2015-11-06T23:52:11      
 ```
+
+##Related documentation
+https://docs.aws.amazon.com/datapipeline/latest/DeveloperGuide/dp-object-redshiftcopyactivity.html
+
