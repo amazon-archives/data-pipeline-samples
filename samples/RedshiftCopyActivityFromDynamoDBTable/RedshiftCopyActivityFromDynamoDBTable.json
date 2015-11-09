@@ -1,0 +1,64 @@
+{
+  "objects": [
+    {
+      "myComment": "This object is used to set default configuration for objects in the pipeline.",
+
+      "name": "Default",
+      "id": "Default",
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myLogUri}",
+      "scheduleType": "cron"
+    },
+    {
+      "myComment": "This object provides connection information for the Redshift cluster.",
+
+      "name": "DefaultDatabase1",
+      "id": "DatabaseId_Kw7C9",
+      "connectionString": "#{myConnectionString}",
+      "databaseName": "#{myRedshiftDatabase}",
+      "*password": "#{myRedshiftPassword}",
+      "type": "RedshiftDatabase",
+      "username": "#{myRedshiftUsername}"
+    },
+    {
+      "myComment": "This object is used to provide the resource where the copy job is invoked.",
+      
+      "name": "DefaultResource1",
+      "id": "ResourceId_idL0Y",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "type": "Ec2Resource",
+      "terminateAfter": "1 Hour"
+    },
+    {
+      "myComment": "This object is used to specify the copy activity for moving data from DynamoDB to Redshift.",
+
+      "name": "CopyFromDDBToRedshift",
+      "id": "ActivityId_vmVn4",
+      "database": {
+        "ref": "DatabaseId_Kw7C9"
+      },      
+      "runsOn": {
+        "ref": "ResourceId_idL0Y"
+      },
+      "type": "SqlActivity",
+      "script": "#{myScript}"
+    },
+    {
+      "myComment": "This object is used to control the task schedule.", 
+
+      "name": "RunOnce",
+      "id": "DefaultSchedule",
+      "occurrences": "1",
+      "period": "1 Day",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    }   
+  ],
+  "parameters": []
+}
