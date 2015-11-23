@@ -24,7 +24,7 @@
     },
     {
       "myComment": "This object is used to create an Amazon EC2 Instance that activities in the pipeline can run on.",
-
+      "name": "Ec2Instance",
       "type": "Ec2Resource",
       "id": "Ec2Instance",
       "instanceType": "t1.micro",
@@ -35,7 +35,7 @@
     },
     {
       "myComment": "This object is a CopyActivity. It is used to define the work that will be done to copy the data from the database to S3.",
-
+      "name": "RDStoS3CopyActivity",
       "type": "CopyActivity",
       "id": "RDStoS3CopyActivity",
       "output": {
@@ -50,18 +50,18 @@
     },
     {
       "myComment": "This object is a mysql datanode. It is used to represent the database which is the input datanode.",
-
+      "name": "SourceRDSTable",
       "type": "MySqlDataNode",
       "id": "SourceRDSTable",
       "connectionString": "#{myRDSConnectStr}",
-      "*password": "#{myRDSPassword}",
+      "*password": "#{*myRDSPassword}",
       "table": "#{myRDSTableName}",
       "selectQuery": "select * from #{table}",
       "username": "#{myRDSUsername}"
     },
     {
       "myComment": "This object is a S3 datanode. It is used to represent the S3 directory where the data will be stored.",
-
+      "name": "S3OutputLocation",
       "type": "S3DataNode",
       "id": "S3OutputLocation",
       "directoryPath": "#{myOutputS3Path}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}"
@@ -69,21 +69,24 @@
   ],
   "parameters": [
     {
-      "id": "myRDSPassword",
+      "id": "*myRDSPassword",
       "type": "String",
       "description": "RDS MySQL password"
     },
     {
+      "watermark" : "s3://mybucket",
       "id": "myS3LogsPath",
       "type": "AWS::S3::ObjectKey",
       "description": "S3 folder for logs"
     },
     {
+      "watermark" : "s3://mybucket",
       "id": "myOutputS3Path",
       "type": "AWS::S3::ObjectKey",
       "description": "Output S3 folder"
     },
     {
+      "watermark" : "sg-12345",
       "id": "myEc2RdsSecurityGrps",
       "type": "String",
       "description": "RDS MySQL security group(s)",
@@ -101,6 +104,7 @@
       "description": "RDS MySQL table name"
     },
     {
+      "watermark" : "jdbc:mysql://connectionstring:3306/dbname",
       "id": "myRDSConnectStr",
       "type": "String",
       "description": "RDS MySQL connection string"
