@@ -13,7 +13,7 @@
       },
       "resourceRole": "DataPipelineDefaultResourceRole",
       "role": "DataPipelineDefaultRole",
-      "pipelineLogUri": "#{myPathToLogFiles}",
+      "pipelineLogUri": "#{myS3Path}/HadoopTerasort",
       "scheduleType": "cron",
       "id": "Default"
     },
@@ -26,103 +26,163 @@
       "type": "Schedule",
       "startAt": "FIRST_ACTIVATION_DATE_TIME"
     },
-    {
-      "myComment": "TeraGen will run map tasks to generate the data and will not run any reduce tasks. Its only purpose is to generate the 10TB of random data ",
 
-      "id": "TeraGen-10GB",
+    {
+      "myComment": "This object is used to set up an Amazon EMR cluster that Hadoop activities can be run on",
+
+      "type": "EmrCluster",
+      "id": "EmrCluster_HadoopTerasort",
+      "enableDebugging": "true",
+      "coreInstanceCount": "2",
+      "coreInstanceType": "m3.xlarge",
+      "masterInstanceType": "m3.xlarge",
+      "releaseLabel": "#{myEmrReleaseLabel}",
+      "applications": ["hadoop"],
+      "terminateAfter": "10 Days",
+      "configuration": [
+          { "ref": "configureEmrYarnSite" },
+          { "ref": "configureEmrMapredSite" }
+      ]
+    },
+
+    {
+        "myComment": "This object configures EMR cluster properties in the yarn-site classification.",
+
+        "type": "EmrConfiguration",
+        "id": "configureEmrYarnSite",
+        "classification": "yarn-site",
+        "property": [
+            { "ref": "yarn-nodemanager-resource-memory-mb" },
+            { "ref": "yarn-scheduler-minimum-allocation" }
+        ]
+    },
+
+    {
+        "myComment": "This object configures EMR cluster properties in the mapred-site classification.",
+
+        "type": "EmrConfiguration",
+        "id": "configureEmrMapredSite",
+        "classification": "mapred-site",
+        "property": [
+            { "ref": "mapreduce-map-memory-mb" }
+        ]
+    },
+
+    {
+        "myComment": "This object sets a configuration property value.",
+
+        "type": "Property",
+        "id": "yarn-nodemanager-resource-memory-mb",
+        "key": "yarn.nodemanager.resource.memory.mb",
+        "value": "11520"
+    },
+
+    {
+        "myComment": "This object sets a configuration property value.",
+
+        "type": "Property",
+        "id": "yarn-scheduler-minimum-allocation",
+        "key": "yarn.scheduler.minimum.allocation",
+        "value": "1440"
+    },
+
+    {
+        "myComment": "This object sets a configuration property value.",
+
+        "type": "Property",
+        "id": "mapreduce-map-memory-mb",
+        "key": "mapreduce.map.memory.mb",
+        "value": "1440"
+    },
+
+    {
+      "myComment": "This HadoopActivity runs map tasks to generate random data. It does not run any reduce tasks.",
+
       "type": "HadoopActivity",
+      "id": "TeraGen_1GB",
       "jarUri": "s3://datapipeline-us-east-1/sample-scripts/HadoopTeraSort/hadoop-examples-1.0.3.jar",
       "argument": [
         "teragen",
-        "100000000",
-        "/mnt/var/terasort/10GB/input"
+        "10000000",
+        "#{myS3Path}/HadoopTerasort/input"
       ],
       "runsOn": {
-        "ref": "EmrCluster"
+        "ref": "EmrCluster_HadoopTerasort"
       }
     },
     {
-      "myComment": "Uses map reduce to sort the data.",
+      "myComment": "This HadoopActivity uses map-reduce to sort the data.",
 
+      "type": "HadoopActivity",
       "id": "TeraSort",
       "dependsOn": {
-        "ref": "TeraGen-10GB"
+        "ref": "TeraGen_1GB"
       },
-      "type": "HadoopActivity",
       "jarUri": "s3://datapipeline-us-east-1/sample-scripts/HadoopTeraSort/hadoop-examples-1.0.3.jar",
       "argument": [
         "terasort",
-        "/mnt/var/terasort/10GB/input",
-        "/mnt/var/terasort/10GB/output/"
+        "#{myS3Path}/HadoopTerasort/input",
+        "#{myS3Path}/HadoopTerasort/output"
       ],
       "runsOn": {
-        "ref": "EmrCluster"
+        "ref": "EmrCluster_HadoopTerasort"
       }
     },
     {
-      "myComment": "Reads the output data and ensures that each key is less then the next key in the entire dataset.",
+      "myComment": "This HadoopActivity reads the output data and ensures that each key is less then the next key in the entire dataset.",
 
+      "type": "HadoopActivity",
       "id": "TeraValidate",
       "dependsOn": {
         "ref": "TeraSort"
       },
-      "type": "HadoopActivity",
       "jarUri": "s3://datapipeline-us-east-1/sample-scripts/HadoopTeraSort/hadoop-examples-1.0.3.jar",
       "argument": [
         "teravalidate",
-        "/mnt/var/terasort/10GB/output",
-        "/mnt/var/terasort/10GB/validate"
+        "#{myS3Path}/HadoopTerasort/output",
+        "#{myS3Path}/HadoopTerasort/validate"
       ],
       "runsOn": {
-        "ref": "EmrCluster"
+        "ref": "EmrCluster_HadoopTerasort"
       }
     },
     {
-      "myComment": "Query the hadoop job history and publish the benchmark JHIST results",
+      "myComment": "This ShellCommandActivity queries the hadoop job history and publishes the benchmark JHIST results. In this example, the script being run is stored in a publicly accessible S3 bucket.",
 
+      "type": "ShellCommandActivity",
       "id": "ProcessJHIST",
       "dependsOn": {
         "ref": "TeraValidate"
       },
-      "type": "ShellCommandActivity",
-      "scriptArgument": "#{myPathToTerasortResults}",
-      "scriptUri": "s3://datapipeline-us-east-1/sample-scripts/HadoopTeraSort/process-jhist.sh",
+      "scriptArgument": "#{myS3Path}/HadoopTerasort/test-results",
+      "scriptUri": "#{myJhistProcessingScriptLocation}",
       "runsOn": {
-        "ref": "EmrCluster"
+        "ref": "EmrCluster_HadoopTerasort"
       }
-    },
-    {
-      "myComment": "Hadoop activities run on this cluster",
-
-      "id": "EmrCluster",
-      "enableDebugging": "true",
-      "coreInstanceCount": "2",
-      "coreInstanceType": "m3.xlarge",
-      "amiVersion": "3.9.0",
-      "masterInstanceType": "m3.xlarge",
-      "type": "EmrCluster",
-      "bootstrapAction" : ["s3://elasticmapreduce/bootstrap-actions/configure-hadoop, --yarn-key-value, yarn.nodemanager.resource.memory-mb=11520,--yarn-key-value,yarn.scheduler.minimum-allocation-mb=1440,--mapred-key-value,mapreduce.map.memory.mb=1440"],
-      "terminateAfter": "10 Days"
     }
   ],
   "parameters": [
-    {
-      "id": "myPathToLogFiles",
-      "type": "AWS::S3::ObjectKey",
-      "description": "Path to pipeline logs",
-      "default": "s3://aravind-terasort/dpl-logging/",
-      "watermark": "s3://aravind-terasort/dpl-logging/"
-    },
-    {
-      "id": "myPathToTerasortResults",
-      "type": "AWS::S3::ObjectKey",
-      "description": "Path to Terasort Results",
-      "default": "s3://aravind-terasort/test-results",
-      "watermark": "s3://aravind-terasort/test-results"
-    }
-  ],
-  "values": {
-    "myPathToLogFiles": "s3://aravind-terasort/dpl-logging/",
-    "myPathToTerasortResults": "s3://aravind-terasort/test-results"
-  }
+     {
+        "myComment": "This Parameter specifies the S3 base path for the pipeline. It is used by the 'Default' object to set the 'pipelineLogUri' value and by the Hadoop activities for intermediate storage. Using Parameters helps users avoid hard coding variables in pipeline definitions. Users can instead supply these parameters when calling 'aws datapipeline put-pipeline-definition' or 'aws datapipeline activate-pipeline-definition'.",
+
+        "type" : "AWS::S3::ObjectKey",
+        "id" : "myS3Path",
+        "description" : "S3 path for pipeline storage."
+     },
+     {
+         "myComment": "This Parameter specifies the AMI version that will be used for the EMR cluster.",
+
+         "type": "String",
+         "id": "myEmrReleaseLabel",
+         "description": "Release label for EMR cluster",
+         "default": "emr-4.1.0"
+     },
+     {
+         "myComment": "The location of the script to run in the ProcessJHIST ShellCommandActivity",
+         "type": "String",
+         "id": "myJhistProcessingScriptLocation",
+         "description": "Path to the JHIST processing script",
+         "default": "s3://datapipeline-samples/HadoopTerasort/process-jhist.sh"
+     }
+  ]
 }
