@@ -15,18 +15,36 @@ AWS Data Pipeline is a web service that you can use to automate the movement and
  $> git clone https://github.com/awslabs/data-pipeline-samples.git
 ```
 
-2 Install and configure the AWS CLI by follow the instructions [here](http://docs.aws.amazon.com/cli/latest/userguide/cli-chap-getting-set-up.html) to install the AWS CLI
+2 Set up a python [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) with the dependencies needed to run these examples. This includes the [awscli](https://github.com/aws/aws-cli) and [boto3](https://github.com/boto/boto3) packages.
+
+```sh
+ $> # install virtualenv
+ $> pip install virtualenv
+
+ $> # in the root directory of data-pipeline-samples:
+ $> virtualenv venv
+ $> source venv/bin/activate
+ $> pip install -r requirements.txt
+```
+
+When you are finished experimenting with the examples, deactivate the virtual environment:
+
+```sh
+ $> deactivate
+```
 
 3 Create AWS IAM roles to run the samples using AWS CLI.
+
 ```sh
  $> aws datapipeline create-default-roles 
 ```
 
 ##Run the Hello World sample
+
 The hello world sample demonstrates a pipeline that creates an EC2 instance and runs `echo Hello World!`. It can be used as a reference template for executing arbitriy shell commands.  
 
 ###Step 1
-Create the pipelineId by calling the *aws data pipeline create-pipeline* command. We'll use this pipelineId to host the pipeline definition document and ultimately to run and monitor the pipeline. 
+Create the pipelineId by calling the *aws data pipeline create-pipeline* command. We'll use this pipelineId to host the pipeline definition document and ultimately to run and monitor the pipeline. The commands in this section should be called from within the virtual environment that you created above.
 
 ```sh
  $> aws datapipeline create-pipeline --name hello_world_pipeline --unique-id hello_world_pipeline 
@@ -47,7 +65,7 @@ Upload the helloworld.json sample pipeline definition by calling the *aws datapi
 ```sh
   $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ \
   --pipeline-definition file://samples/helloworld/helloworld.json \
-  --parameter-values myS3LogsPath="<your s3 logging path>"
+  --parameter-values myS3LogsPath="s3://<your s3 logging path>"
 ```
 
 You will receive a validation messages like this

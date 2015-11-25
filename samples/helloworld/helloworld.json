@@ -7,7 +7,7 @@
       "failureAndRerunMode":"cascade",
       "resourceRole": "DataPipelineDefaultResourceRole",
       "role": "DataPipelineDefaultRole",
-      "pipelineLogUri": "#{myS3LogsPath}",
+      "pipelineLogUri": "#{myS3LogsPath}/HelloWorld",
       "scheduleType": "cron",
       "schedule": {
         "ref": "DefaultSchedule"
@@ -27,7 +27,7 @@
     { 
       "myComment": "This object is used to create an Amazon EC2 Instance that activities in the pipeline can run on.",
 
-      "id": "A_Fresh_NewEC2Instance",
+      "id": "EC2Resource_HelloWorld",
       "type": "Ec2Resource",
       "terminateAfter": "1 Hour"
     },
@@ -36,10 +36,22 @@
 
       "id": "ShellCommandActivity_HelloWorld",
       "runsOn": {
-        "ref": "A_Fresh_NewEC2Instance"
+        "ref": "EC2Resource_HelloWorld"
       },
       "type": "ShellCommandActivity",
       "command": "echo 'Hello World!'"
+    },
+    {
+        "id": "OutputData",
+        "name": "OutputData",
+        "type": "S3DataNode",
+        "filePath": "s3://joshtok-test/abc"
+    },
+    {
+        "id": "OutputData2",
+        "name": "OutputData",
+        "type": "S3DataNode",
+        "filePath": "s3://joshtok-test/def"
     }
   ],
 "parameters": [
