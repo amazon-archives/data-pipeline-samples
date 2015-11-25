@@ -1,6 +1,6 @@
 #Redshift To RDS Without RDS Table create Sample 
 
-This sample demonstrates how you can use Data Pipeline's to copy data from a Redshift table to a RDS table. The template assumes that the table is already created in RDS. To make this sample to work, you must ensure you have the following:
+This sample demonstrates how you can use Data Pipeline to copy data from a Redshift table to a RDS table. The template assumes that the table is already created in RDS. To make this sample to work, you must ensure you have the following:
 
 * myRDSDatabaseName: Rds Database Instance Name (DB Instance)
 * myRedshiftInstanceId: Redshift Cluster name (Cluster)
