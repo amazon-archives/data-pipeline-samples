@@ -1,0 +1,240 @@
+{
+  "objects": [
+    {
+      "output": {
+        "ref": "S3OutputLocation"
+      },
+      "input": {
+        "ref": "RedshiftDataNode"
+      },
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "name": "RedshiftToS3",
+      "id": "RedshiftToS3",
+      "runsOn": {
+        "ref": "Ec2Instance"
+      },
+      "type": "RedshiftCopyActivity",
+      "myComment": "This object is a RedshiftCopyActivity. It is used to define the work that will be done to copy the data from Redshift to S3.",
+      "insertMode": "TRUNCATE"
+    },
+    {
+      "occurrences": "1",
+      "period": "1 Day",
+      "name": "RunOnce",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myS3LogsPath}",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "database": {
+        "ref": "RedshiftCluster"
+      },
+      "name": "RedshiftDataNode",
+      "id": "RedshiftDataNode",
+      "type": "RedshiftDataNode",
+      "tableName": "#{myRedshiftTableName}"
+    },
+    {
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "instanceType": "m1.small",
+      "name": "Ec2Instance",
+      "securityGroups": "#{myEc2SecurityGrps}",
+      "id": "Ec2Instance",
+      "type": "Ec2Resource",
+      "myComment": "This object is used to create an Amazon EC2 Instance that activities in the pipeline can run on.",
+      "terminateAfter": "2 Hours"
+    },
+    {
+      "directoryPath": "#{myOutputS3Path}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}/",
+      "name": "S3OutputLocation",
+      "id": "S3OutputLocation",
+      "type": "S3DataNode",
+      "myComment": "This object is a S3 datanode. It is used to represent the S3 directory where the data will be stored."
+    },
+    {
+      "databaseName": "#{myRedshiftDatabaseName}",
+      "*password": "#{*myRedshiftPassword}",
+      "name": "RedshiftCluster",
+      "id": "RedshiftCluster",
+      "clusterId": "#{myRedshiftInstanceId}",
+      "type": "RedshiftDatabase",
+      "username": "#{myRedshiftUsername}"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "database": {
+        "ref": "RdsDatabase"
+      },
+      "name": "RDSDataNode",
+      "insertQuery": "#{myInsertQueryPreparedStatement}",
+      "id": "RDSDataNode",
+      "type": "MySqlDataNode",
+      "table": "#{myRDSTableName}"
+    },
+    {
+      "output": {
+        "ref": "RDSDataNode"
+      },
+      "input": {
+        "ref": "S3OutputLocation"
+      },
+      "dependsOn": {
+        "ref": "CreateTableActivity"
+      },
+      "name": "S3toRdsCopyActivity",
+      "id": "S3ToRdsCopyActivity",
+      "runsOn": {
+        "ref": "Ec2Instance"
+      },
+      "myComment": "This object is a CopyActivity. It is used to define the work that will be done to copy the data from the S3 to RDS.",
+      "type": "CopyActivity"
+    },
+    {
+      "databaseName": "#{myRDSDatabaseName}",
+      "*password": "#{*myRDSPassword}",
+      "name": "RdsDatabase",
+      "id": "RdsDatabase",
+      "type": "RdsDatabase",
+      "rdsInstanceId": "#{myRDSInstanceId}",
+      "username": "#{myRDSUsername}"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "dependsOn": {
+        "ref": "S3ToRdsCopyActivity"
+      },
+      "name": "S3CleanupActivity",
+      "runsOn": {
+        "ref": "Ec2Instance"
+      },
+      "id": "S3CleanupActivity",
+      "myComment": "This object is a ShellCommandActivity. It is used to cleanup the S3 directory.",
+      "type": "ShellCommandActivity",
+      "command": "(sudo yum -y update aws-cli) && (aws s3 rm #{myOutputS3Path}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')} --recursive)"
+    },
+    {
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "database": {
+        "ref": "RdsDatabase"
+      },
+      "dependsOn": {
+        "ref": "RedshiftToS3"
+      },
+      "runsOn": {
+        "ref": "Ec2Instance"
+      },
+      "name": "CreateTableActivity",
+      "id": "CreateTableActivity",
+      "type": "SqlActivity",
+      "script": "#{myCreateTableQuery}"
+    }
+  ],
+  "parameters": [
+    {
+      "watermark": "s3://mybucket",
+      "description": "Temporary S3 folder",
+      "id": "myOutputS3Path",
+      "type": "AWS::S3::ObjectKey"
+    },
+    {
+      "description": "RDS MySQL password",
+      "id": "*myRDSPassword",
+      "type": "String"
+    },
+    {
+      "description": "RDS MySQL table name",
+      "id": "myRDSTableName",
+      "type": "String"
+    },
+    {
+      "watermark": "create table table_name(col1 varchar(255),col2 integer);",
+      "description": "RDS create table query",
+      "id": "myCreateTableQuery",
+      "type": "String"
+    },
+    {
+      "watermark": "insert into table_name(col1,col2) values(?,?);",
+      "description": "RDS Insert Query Prepared Statement",
+      "id": "myInsertQueryPreparedStatement",
+      "type": "String"
+    },
+    {
+      "description": "RDS Database name",
+      "id": "myRDSDatabaseName",
+      "type": "String"
+    },
+    {
+      "description": "Redshift MySQL password",
+      "id": "*myRedshiftPassword",
+      "type": "String"
+    },
+    {
+      "description": "Redshift Database name",
+      "id": "myRedshiftDatabaseName",
+      "type": "String"
+    },
+    {
+      "description": "RDS Instance name (DB Instance)",
+      "id": "myRDSInstanceId",
+      "type": "String"
+    },
+    {
+      "description": "Redshift Instance name (Cluster)",
+      "id": "myRedshiftInstanceId",
+      "type": "String"
+    },
+    {
+      "description": "Redshift MySQL table name",
+      "id": "myRedshiftTableName",
+      "type": "String"
+    },
+    {
+      "description": "Redshift Database Username",
+      "id": "myRedshiftUsername",
+      "type": "String"
+    },
+    {
+      "watermark": "s3://mybucket",
+      "description": "S3 folder for logs",
+      "id": "myS3LogsPath",
+      "type": "AWS::S3::ObjectKey"
+    },
+    {
+      "watermark": "sg-12345",
+      "description": "Ec2 security group(s)",
+      "isArray": "true",
+      "optional": "true",
+      "id": "myEc2SecurityGrps",
+      "type": "String"
+    },
+    {
+      "description": "RDS Database Username",
+      "id": "myRDSUsername",
+      "type": "String"
+    }
+  ]
+}
