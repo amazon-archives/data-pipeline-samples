@@ -14,9 +14,6 @@ numClients=$7
 echo 'sudo yum -y install nfs-utils'
 sudo yum -y install nfs-utils
 
-echo "sudo su"
-sudo su
-
 if [ ! -d /backup ]; then
   echo 'sudo mkdir /backup'
   sudo mkdir /backup
@@ -30,15 +27,15 @@ if [ ! -d /mnt/backups ]; then
   sudo mount -t nfs $destination /mnt/backups
 fi
 
-if [ ! -f /tmp/efs-restore.log ]; then
+if [ -f /tmp/efs-restore.log ]; then
   echo "sudo rm /tmp/efs-restore.log"
   sudo rm /tmp/efs-restore.log
 fi
 
 #Copy all content this node is responsible for
-for myContent in `ls -a --ignore . --ignore .. /mnt/backups/$efsid/$interval.$backupNum | awk 'NR%'$numClients==$clientNum`; do
-  echo "sudo rsync -ah --stats --delete --numeric-ids --log-file=/tmp/efs-restore.log /mnt/backups/$efsid/$interval.$backupNum /backup/"
-  sudo rsync -ah --stats --delete --numeric-ids --log-file=/tmp/efs-restore.log /mnt/backups/$efsid/$interval.$backupNum/ /backup/
+for myContent in `sudo ls -a --ignore . --ignore .. /mnt/backups/$efsid/$interval.$backupNum | awk 'NR%'$numClients==$clientNum`; do
+  echo "sudo rsync -ah --stats --delete --numeric-ids --log-file=/tmp/efs-restore.log /mnt/backups/$efsid/$interval.$backupNum/$myContent /backup/"
+  sudo rsync -ah --stats --delete --numeric-ids --log-file=/tmp/efs-restore.log /mnt/backups/$efsid/$interval.$backupNum/$myContent /backup/
   rsyncStatus=$?
 done
 if [ -f /tmp/efs-restore.log ]; then
@@ -46,4 +43,3 @@ echo "sudo cp /tmp/efs-restore.log /mnt/backups/efsbackup-logs/$efsid-$interval.
 sudo cp /tmp/efs-restore.log /mnt/backups/efsbackup-logs/$efsid-$interval.$backupNum-restore-$clientNum.$numClients-`date +%Y%m%d-%H%M`.log
 fi
 exit $rsyncStatus
-exit
