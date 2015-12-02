@@ -1,0 +1,155 @@
+{
+    "objects": [
+        {
+            "id": "Default",
+            "scheduleType": "cron",
+            "failureAndRerunMode": "CASCADE",
+            "schedule": {"ref": "DefaultSchedule"},
+            "name": "Default",
+            "role": "DataPipelineDefaultRole",
+            "resourceRole": "DataPipelineDefaultResourceRole"
+        },
+        {
+            "id": "EC2Resource1",
+            "terminateAfter": "70 Minutes",
+            "instanceType": "#{myInstanceType}",
+            "name": "EC2Resource1",
+            "type": "Ec2Resource",
+            "securityGroupIds": [
+                "#{mySrcSecGroupID}",
+                "#{myBackupSecGroupID}"
+            ],
+            "subnetId": "#{mySubnetID}",
+            "associatePublicIpAddress": "true"
+        },
+        {
+            "id": "EC2Resource2",
+            "terminateAfter": "70 Minutes",
+            "instanceType": "#{myInstanceType}",
+            "name": "EC2Resource2",
+            "type": "Ec2Resource",
+            "securityGroupIds": [
+                "#{mySrcSecGroupID}",
+                "#{myBackupSecGroupID}"
+            ],
+            "subnetId": "#{mySubnetID}",
+            "associatePublicIpAddress": "true"
+        },
+        {
+            "id": "DefaultSchedule",
+            "name": "RunOnce",
+            "startAt": "FIRST_ACTIVATION_DATE_TIME",
+            "type": "Schedule",
+            "occurrences": "1",
+            "period": "1 Days"
+        },
+        {
+            "id": "RestorePart1",
+            "name": "RestorePart1",
+            "runsOn": {"ref": "EC2Resource1"},
+            "command": "wget https://raw.githubusercontent.com/awslabs/data-pipeline-samples/master/samples/EFSBackup/efs-restore-rsync.sh\nchmod a+x efs-restore-rsync.sh\n./efs-restore-rsync.sh $1 $2 $3 $4 $5 $6 $7",
+            "scriptArgument": [
+                "#{myEfsSource}",
+                "#{myEfsBackup}",
+                "#{myInterval}",
+                "#{myBackup}",
+                "#{myEfsID}",
+                "1",
+                "2"
+            ],
+            "type": "ShellCommandActivity",
+            "stage": "true"
+        },
+        {
+            "id": "RestorePart2",
+            "name": "RestorePart2",
+            "runsOn": {"ref": "EC2Resource2"},
+            "command": "wget https://raw.githubusercontent.com/awslabs/data-pipeline-samples/master/samples/EFSBackup/efs-restore-rsync.sh\nchmod a+x efs-restore-rsync.sh\n./efs-restore-rsync.sh $1 $2 $3 $4 $5 $6 $7",
+            "scriptArgument": [
+                "#{myEfsSource}",
+                "#{myEfsBackup}",
+                "#{myInterval}",
+                "#{myBackup}",
+                "#{myEfsID}",
+                "0",
+                "2"
+            ],
+            "type": "ShellCommandActivity",
+            "stage": "true"
+        }
+    ],
+    "parameters": [
+        {
+            "id": "myInstanceType",
+            "default": "m3.large",
+            "description": "Instance type for performing the restore.",
+            "allowedValues": [
+                "t1.micro",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge"
+            ],
+            "type": "String"
+        },
+        {
+            "id": "mySubnetID",
+            "default": "subnet-1234abcd",
+            "description": "VPC subnet for your restoration EC2 instance (ideally the same subnet used for the backup EFS mount point).",
+            "type": "String"
+        },
+        {
+            "id": "mySrcSecGroupID",
+            "default": "sg-1111111b",
+            "description": "Security group that can connect to the Production EFS mount point.",
+            "type": "String"
+        },
+        {
+            "id": "myBackupSecGroupID",
+            "default": "sg-9999999b",
+            "description": "Security group that can connect to the Backup EFS mount point.",
+            "type": "String"
+        },
+        {
+            "id": "myInterval",
+            "default": "daily",
+            "description": "Interval for backups.",
+            "allowedValues": [
+                "hourly",
+                "daily",
+                "weekly",
+                "monthly"
+            ],
+            "type": "String"
+        },
+        {
+            "id": "myBackup",
+            "default": "0",
+            "description": "Backup number to restore (0 = the most recent backup).",
+            "type": "Integer"
+        },
+        {
+            "id": "myEfsID",
+            "default": "backup-fs-12345678",
+            "description": "Name for the directory that already contains your backups",
+            "type": "String"
+        },
+        {
+            "id": "myEfsSource",
+            "default": "10.0.1.32:/",
+            "description": "Production EFS mount target IP address.",
+            "type": "String"
+        },
+        {
+            "id": "myEfsBackup",
+            "default": "10.0.1.75:/",
+            "description": "Backup EFS mount target IP address.",
+            "type": "String"
+        }
+    ]
+}

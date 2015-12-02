@@ -1,0 +1,219 @@
+{
+    "objects": [
+        {
+            "id": "Default",
+            "scheduleType": "cron",
+            "failureAndRerunMode": "CASCADE",
+            "schedule": {"ref": "DefaultSchedule"},
+            "name": "Default",
+            "role": "DataPipelineDefaultRole",
+            "resourceRole": "DataPipelineDefaultResourceRole"
+        },
+        {
+            "id": "EC2Resource1",
+            "terminateAfter": "70 Minutes",
+            "instanceType": "#{myInstanceType}",
+            "name": "EC2Resource1",
+            "type": "Ec2Resource",
+            "securityGroupIds": [
+                "#{mySrcSecGroupID}",
+                "#{myBackupSecGroupID}"
+            ],
+            "subnetId": "#{mySubnetID}",
+            "associatePublicIpAddress": "true"
+        },
+        {
+            "id": "EC2Resource2",
+            "terminateAfter": "70 Minutes",
+            "instanceType": "#{myInstanceType}",
+            "name": "EC2Resource2",
+            "type": "Ec2Resource",
+            "securityGroupIds": [
+                "#{mySrcSecGroupID}",
+                "#{myBackupSecGroupID}"
+            ],
+            "subnetId": "#{mySubnetID}",
+            "associatePublicIpAddress": "true"
+        },
+        {
+            "id": "EC2Resource3",
+            "terminateAfter": "70 Minutes",
+            "instanceType": "#{myInstanceType}",
+            "name": "EC2Resource3",
+            "type": "Ec2Resource",
+            "securityGroupIds": [
+                "#{mySrcSecGroupID}",
+                "#{myBackupSecGroupID}"
+            ],
+            "subnetId": "#{mySubnetID}",
+            "associatePublicIpAddress": "true"
+        },
+        {
+            "id": "DefaultSchedule",
+            "name": "Every Day",
+            "startAt": "FIRST_ACTIVATION_DATE_TIME",
+            "type": "Schedule",
+            "period": "1 Days"
+        },
+        {
+            "id": "InitBackup",
+            "name": "InitBackup",
+            "runsOn": {"ref": "EC2Resource1"},
+            "command": "wget https://raw.githubusercontent.com/awslabs/data-pipeline-samples/master/samples/EFSBackup/efs-backup-init.sh\nchmod a+x efs-backup-init.sh\n./efs-backup-init.sh $1 $2 $3 $4 $5",
+            "scriptArgument": [
+                "#{myEfsSource}",
+                "#{myEfsBackup}",
+                "#{myInterval}",
+                "#{myRetainedBackups}",
+                "#{myEfsID}"
+            ],
+            "type": "ShellCommandActivity",
+            "stage": "true"
+        },
+        {
+            "id": "BackupPart1",
+            "name": "BackupPart1",
+            "runsOn": {"ref": "EC2Resource1"},
+            "command": "wget https://raw.githubusercontent.com/awslabs/data-pipeline-samples/master/samples/EFSBackup/efs-backup-rsync.sh\nchmod a+x efs-backup-rsync.sh\n./efs-backup-rsync.sh $1 $2 $3 $4 $5 $6 $7",
+            "scriptArgument": [
+                "#{myEfsSource}",
+                "#{myEfsBackup}",
+                "#{myInterval}",
+                "#{myRetainedBackups}",
+                "#{myEfsID}",
+                "1",
+                "3"
+            ],
+            "type": "ShellCommandActivity",
+            "dependsOn": {"ref": "InitBackup"},
+            "stage": "true"
+        },
+        {
+            "id": "BackupPart2",
+            "name": "BackupPart2",
+            "runsOn": {"ref": "EC2Resource2"},
+            "command": "wget https://raw.githubusercontent.com/awslabs/data-pipeline-samples/master/samples/EFSBackup/efs-backup-rsync.sh\nchmod a+x efs-backup-rsync.sh\n./efs-backup-rsync.sh $1 $2 $3 $4 $5 $6 $7",
+            "scriptArgument": [
+                "#{myEfsSource}",
+                "#{myEfsBackup}",
+                "#{myInterval}",
+                "#{myRetainedBackups}",
+                "#{myEfsID}",
+                "2",
+                "3"
+            ],
+            "type": "ShellCommandActivity",
+            "dependsOn": {"ref": "InitBackup"},
+            "stage": "true"
+        },
+        {
+            "id": "BackupPart3",
+            "name": "BackupPart3",
+            "runsOn": {"ref": "EC2Resource3"},
+            "command": "wget https://raw.githubusercontent.com/awslabs/data-pipeline-samples/master/samples/EFSBackup/efs-backup-rsync.sh\nchmod a+x efs-backup-rsync.sh\n./efs-backup-rsync.sh $1 $2 $3 $4 $5 $6 $7",
+            "scriptArgument": [
+                "#{myEfsSource}",
+                "#{myEfsBackup}",
+                "#{myInterval}",
+                "#{myRetainedBackups}",
+                "#{myEfsID}",
+                "0",
+                "3"
+            ],
+            "type": "ShellCommandActivity",
+            "dependsOn": {"ref": "InitBackup"},
+            "stage": "true"
+        },
+        {
+            "id": "FinalizeBackup",
+            "name": "FinalizeBackup",
+            "runsOn": {"ref": "EC2Resource1"},
+            "command": "wget https://raw.githubusercontent.com/awslabs/data-pipeline-samples/master/samples/EFSBackup/efs-backup-end.sh\nchmod a+x efs-backup-end.sh\n./efs-backup-end.sh $1 $2",
+            "scriptArgument": [
+                "#{myInterval}",
+                "#{myEfsID}"
+            ],
+            "type": "ShellCommandActivity",
+            "dependsOn": [
+                {"ref": "BackupPart1"},
+                {"ref": "BackupPart2"},
+                {"ref": "BackupPart3"}
+            ],
+            "stage": "true"
+        }
+    ],
+    "parameters": [
+        {
+            "id": "myInstanceType",
+            "default": "m3.large",
+            "description": "Instance type for creating backups.",
+            "allowedValues": [
+                "t1.micro",
+                "m3.medium",
+                "m3.large",
+                "m3.xlarge",
+                "m3.2xlarge",
+                "c3.large",
+                "c3.xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge"
+            ],
+            "type": "String"
+        },
+        {
+            "id": "mySubnetID",
+            "default": "subnet-1234abcd",
+            "description": "VPC subnet for your restoration EC2 instance (ideally the same subnet used for the backup EFS mount point).",
+            "type": "String"
+        },
+        {
+            "id": "mySrcSecGroupID",
+            "default": "sg-1111111b",
+            "description": "Security group that can connect to the Production EFS mount point.",
+            "type": "String"
+        },
+        {
+            "id": "myBackupSecGroupID",
+            "default": "sg-9999999b",
+            "description": "Security group that can connect to the Backup EFS mount point.",
+            "type": "String"
+        },
+        {
+            "id": "myInterval",
+            "default": "daily",
+            "description": "Interval for backups.",
+            "allowedValues": [
+                "hourly",
+                "daily",
+                "weekly",
+                "monthly"
+            ],
+            "type": "String"
+        },
+        {
+            "id": "myRetainedBackups",
+            "default": "7",
+            "description": "Number of backups to retain.",
+            "type": "Integer"
+        },
+        {
+            "id": "myEfsID",
+            "default": "backup-fs-12345678",
+            "description": "Name for the directory that will contain your backups.",
+            "type": "String"
+        },
+        {
+            "id": "myEfsSource",
+            "default": "10.0.1.32:/",
+            "description": "Production EFS mount target IP address.",
+            "type": "String"
+        },
+        {
+            "id": "myEfsBackup",
+            "default": "10.0.1.75:/",
+            "description": "Backup EFS mount target IP address.",
+            "type": "String"
+        }
+    ]
+}
