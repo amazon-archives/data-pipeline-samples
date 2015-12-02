@@ -26,13 +26,13 @@ if [ ! -d /mnt/backups ]; then
   sudo mount -t nfs $destination /mnt/backups
 fi
 
-if [ ! -f /tmp/efs-backup.log ]; then
+if [ -f /tmp/efs-backup.log ]; then
   echo "sudo rm /tmp/efs-backup.log"
   sudo rm /tmp/efs-backup.log
 fi
 
 #Copy all content this node is responsible for
-for myContent in `ls -a --ignore . --ignore .. /backup/ | awk 'NR%'$numClients==$clientNum`; do
+for myContent in `sudo ls -a --ignore . --ignore .. /backup/ | awk 'NR%'$numClients==$clientNum`; do
   echo "sudo rsync -ah --stats --delete --numeric-ids --log-file=/tmp/efs-backup.log /backup/$myContent /mnt/backups/$efsid/$interval.0/"
   sudo rsync -ah --stats --delete --numeric-ids --log-file=/tmp/efs-backup.log /backup/$myContent /mnt/backups/$efsid/$interval.0/
   rsyncStatus=$?
