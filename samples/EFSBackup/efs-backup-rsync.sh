@@ -33,8 +33,8 @@ fi
 
 #Copy all content this node is responsible for
 for myContent in `sudo ls -a --ignore . --ignore .. /backup/ | awk 'NR%'$numClients==$clientNum`; do
-  echo "sudo rsync -ah --stats --delete --numeric-ids --log-file=/tmp/efs-backup.log /backup/$myContent /mnt/backups/$efsid/$interval.0/"
-  sudo rsync -ah --stats --delete --numeric-ids --log-file=/tmp/efs-backup.log "/backup/$myContent" /mnt/backups/$efsid/$interval.0/
+  echo "sudo rsync -s -ah --stats --delete --numeric-ids --log-file=/tmp/efs-backup.log /backup/$myContent /mnt/backups/$efsid/$interval.0/"
+  sudo rsync -s -ah --stats --delete --numeric-ids --log-file=/tmp/efs-backup.log /backup/$myContent /mnt/backups/$efsid/$interval.0/
   rsyncStatus=$?
 done
 
