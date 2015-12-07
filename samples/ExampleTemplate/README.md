@@ -6,12 +6,13 @@
 
 <table>
 
-<tr><th>Parameter</th><th>Description</th></tr>
+<tr><th>Parameter</th><th>Required</th><th>Description</th></tr>
 
 <tr>
 <td>{{Parameter Name}}</td>
+<td>{{yes/no}}</td>
 <td>
-(Required/Optional) {{Description}} {{Example or Default}}
+{{Description}} {{Example or Default}}
 </td>
 </tr>
 
@@ -28,13 +29,15 @@ to complete, and when it's finished it will print the resource identifier of the
  $> python setup.py
 ```
 
-# Running this sample
+If the script fails with an ImportError, you may need to [setup your virtualenv](https://github.com/awslabs/data-pipeline-samples#setup).
+
+## Running this sample
 
 Create a new pipeline. Throughout this section we assume that the {{Example Directory}} sample directory is
 your current working directory.
 
 ```sh
- $> aws datapipeline create-pipeline --name {{exampe_name}} --unique-id {{exampe_name}} 
+ $> aws datapipeline create-pipeline --name {{example_name}} --unique-id {{example_name}} 
 # {
 #     "pipelineId": "df-03971252U4AVY60545T7"
 # }

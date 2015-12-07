@@ -13,18 +13,20 @@ script is included in this directory for your convenience.
 
 <table>
 
-<tr><th>Parameter</th><th>Description</th></tr>
+<tr><th>Parameter</th><th>Required</th><th>Description</th></tr>
 <tr>
 <td>myS3Path</td>
+<td>yes</td>
 <td>
-(Required) An <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html#object-keys">S3 key</a> where the Hadoop configuration and benchmark results will be stored. Example: "s3://data-pipeline-samples-12345"
+An <a href="http://docs.aws.amazon.com/AmazonS3/latest/dev/UsingMetadata.html#object-keys">S3 key</a> where the Hadoop configuration and benchmark results will be stored. Example: "s3://data-pipeline-samples-12345"
 </td>
 </tr>
 
 <tr>
 <td>myEmrReleaseLabel</td>
+<td>no</td>
 <td>
-(Optional) The release label for the Amazon <a
+The release label for the Amazon <a
 href="http://docs.aws.amazon.com/ElasticMapReduce/latest/ReleaseGuide/emr-release-components.html">EMR
 release</a>. This is used to provision the <a
 href="http://docs.aws.amazon.com/ElasticMapReduce/latest/ManagementGuide/emr-what-is-emr.html">EMR
@@ -34,7 +36,8 @@ cluster</a> where the Hadoop jobs will be run. Default: "emr-4.1.0"
 
 <tr>
 <td>myJhistProcessingScriptLocation</td>
-<td>(Optional) The location of the shell script that will be used to process the job history files produced by the Hadoop activities. Default: "s3://datapipeline-samples/HadoopTerasort/process-jhist.sh"
+<td>no</td>
+<td>The location of the shell script that will be used to process the job history files produced by the Hadoop activities. Default: "s3://datapipeline-samples/HadoopTerasort/process-jhist.sh"
 </tr>
 
 </table>
@@ -85,7 +88,7 @@ Activate the pipeline. Use the `pipelineId` that was returned by the `create-pip
 
 Optionally, check the status of your running pipeline. Use the `pipelineId` that was returned by the
 `create-pipeline` command. When the pipeline has completed, the Status Ended column in the output
-from this command will show FINISHED for all pipeine nodes.
+from this command will show FINISHED for all pipeline nodes.
 
 ```sh
 
@@ -133,11 +136,11 @@ sample again without deleting, you may receive errors or unexpected behavior.
 ```
 
 The resources used by this example will incur normal charges. If you provisioned resources using the
-setup script, you can free them by running the following command in the HelloWorld sample directory.
+setup script, you can free them by running the following command in the {{Example Name}} sample directory.
 
 ```sh
  $> python setup.py --teardown
-# Request to delete stack [dpl-samples-hello-world] has been sent
+# Request to delete stack [{{stack name}}] has been sent
 ```
 
 ## Disclaimer

@@ -20,6 +20,7 @@
     {
       "myComment": "This object is used to specify the time-based trigger for executing Activities and for provisioning Resources of the pipeline. In this case it is used by the 'Default' object so it will cascade down to all other objects in the pipeline if they do not override it. For this example, we use it to specify that our pipeline should execute immediately upon activation. Also, we are using the 'occurrences' option to specify that the pipeline should be run only once. Note: You can have multiple schedules defined in a pipeline.",
 
+      "occurrences": "1",
       "period": "1 Day",
       "name": "Every Day",
       "id": "DailySchedule",
