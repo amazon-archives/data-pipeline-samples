@@ -27,8 +27,8 @@ You receive a pipelineId like this.
 
 ```sh
   $> aws datapipeline put-pipeline-definition --pipeline-definition file://pipeline.json \
-  --parameter-values myDDBRegion=<s3://your/s3/staging/path> myTempS3Folder=<s3://your/s3/temp/path> \
-   myDDBSourceTable=<dynamodb source table> myDDBDestinationTable=<dynamodb destination table> myS3LogsPath=<s3://logs/path> \
+  --parameter-values myDDBRegion=<aws region> myTempS3Folder=<s3://your/s3/temp/path> \
+   myDDBSourceTableName=<dynamodb source table> myDDBDestinationTableName=<dynamodb destination table> myS3LogsPath=<s3://logs/path> \
    --pipeline-id <Your Pipeline ID> 
 ```
 

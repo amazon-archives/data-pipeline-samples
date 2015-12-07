@@ -147,7 +147,7 @@
             "watermark": "Enter value between 0.1-1.0"
         },
         {
-            "myComment": "Temporary S3 path to store the dynamodb backup csv files, backup files will be deleted after the copy completes"
+            "myComment": "Temporary S3 path to store the dynamodb backup csv files, backup files will be deleted after the copy completes",
             "id": "myTempS3Folder",
             "type": "AWS::S3::ObjectKey",
             "description": "Temporary S3 folder"
