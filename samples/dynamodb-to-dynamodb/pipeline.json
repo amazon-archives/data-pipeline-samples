@@ -1,0 +1,157 @@
+{
+    "objects": [
+        {
+            "startAt": "FIRST_ACTIVATION_DATE_TIME",
+            "name": "DailySchedule",
+            "id": "DailySchedule",
+            "period": "1 day",
+            "type": "Schedule",
+            "occurrences": "1"
+        },
+        {
+            "id": "Default",
+            "name": "Default",
+            "scheduleType": "CRON",
+            "pipelineLogUri": "#{myS3LogsPath}", 
+            "schedule": {
+                "ref": "DailySchedule"
+            },
+            "failureAndRerunMode": "CASCADE",
+            "role": "DataPipelineDefaultRole",
+            "resourceRole": "DataPipelineDefaultResourceRole"
+        },
+        {
+            "id": "DDBSourceTable",
+            "tableName": "#{myDDBSourceTableName}",
+            "name": "DDBSourceTable",
+            "type": "DynamoDBDataNode",
+            "readThroughputPercent": "#{myDDBReadThroughputRatio}"
+        },
+        {
+            "name": "S3TempLocation",
+            "id": "S3TempLocation",
+            "type": "S3DataNode",
+            "directoryPath": "#{myTempS3Folder}/#{format(@scheduledStartTime, 'YYYY-MM-dd-HH-mm-ss')}"
+        },
+        {
+            "id": "DDBDestinationTable",
+            "tableName": "#{myDDBDestinationTableName}",
+            "name": "DDBDestinationTable",
+            "type": "DynamoDBDataNode",
+            "writeThroughputPercent": "#{myDDBWriteThroughputRatio}"
+        },
+        {
+            "id": "EmrClusterForBackup",
+            "name": "EmrClusterForBackup",
+            "amiVersion": "3.8.0",
+            "masterInstanceType": "m3.xlarge",
+            "coreInstanceType": "m3.xlarge",
+            "coreInstanceCount": "1",
+            "region": "#{myDDBRegion}",
+            "terminateAfter": "10 Days",
+            "type": "EmrCluster"
+        },
+        {
+            "id": "TableLoadActivity",
+            "name": "TableLoadActivity",
+            "runsOn": {
+                "ref": "EmrClusterForBackup"
+            },
+            "input": {
+                "ref": "S3TempLocation"
+            },
+            "output": {
+                "ref": "DDBDestinationTable"
+            },
+            "type": "EmrActivity",
+            "maximumRetries": "2",
+            "dependsOn": {
+               "ref": "TableBackupActivity"
+            },
+            "resizeClusterBeforeRunning": "true",
+            "step": [
+                "s3://dynamodb-emr-#{myDDBRegion}/emr-ddb-storage-handler/2.1.0/emr-ddb-2.1.0.jar,org.apache.hadoop.dynamodb.tools.DynamoDbImport,#{input.directoryPath},#{output.tableName},#{output.writeThroughputPercent}"
+            ]
+        },
+        {
+            "id": "TableBackupActivity",
+            "name": "TableBackupActivity",
+            "input": {
+                "ref": "DDBSourceTable"
+            },
+            "output": {
+                "ref": "S3TempLocation"
+            },
+            "runsOn": {
+                "ref": "EmrClusterForBackup"
+            },
+            "resizeClusterBeforeRunning": "true",
+            "type": "EmrActivity",
+            "maximumRetries": "2",
+            "step": [
+                "s3://dynamodb-emr-#{myDDBRegion}/emr-ddb-storage-handler/2.1.0/emr-ddb-2.1.0.jar,org.apache.hadoop.dynamodb.tools.DynamoDbExport,#{output.directoryPath},#{input.tableName},#{input.readThroughputPercent}"
+            ]
+        },
+        {
+            "dependsOn": {
+                "ref": "TableLoadActivity"
+             },
+             "name": "S3CleanupActivity",
+             "id": "S3CleanupActivity",
+             "input": {
+                "ref": "S3TempLocation"
+             },
+             "runsOn": {
+                 "ref": "EmrClusterForBackup"
+             },
+             "type": "ShellCommandActivity",
+             "command": "(sudo yum -y update aws-cli) && (aws s3 rm #{input.directoryPath} --recursive)"
+        }
+    ],
+    "parameters": [
+        {
+            "myComment": "This Parameter specifies the S3 logging path for the pipeline.  It is used by the 'Default' object to set the 'pipelineLogUri' value.",
+            "id" : "myS3LogsPath",
+            "type" : "AWS::S3::ObjectKey",
+            "description" : "S3 path for pipeline logs."
+        },
+        {
+            "id": "myDDBSourceTableName",
+            "type": "String",
+            "description": "Source DynamoDB table name"
+        },
+        {
+            "id": "myDDBDestinationTableName",
+            "type": "String",
+            "description": "Target DynamoDB table name"
+        },
+        {
+            "id": "myDDBWriteThroughputRatio",
+            "type": "Double",
+            "description": "DynamoDB write throughput ratio",
+            "default": "0.25",
+            "watermark": "Enter value between 0.1-1.0"
+        },
+        {
+            "id": "myDDBRegion",
+            "type": "String",
+            "description": "Region of the DynamoDB table",
+            "default": "us-east-1",
+            "watermark": "us-east-1"
+        },
+        {
+            "id": "myDDBReadThroughputRatio",
+            "type": "Double",
+            "description": "DynamoDB read throughput ratio",
+            "default": "0.25",
+            "watermark": "Enter value between 0.1-1.0"
+        },
+        {
+            "myComment": "Temporary S3 path to store the dynamodb backup csv files, backup files will be deleted after the copy completes",
+            "id": "myTempS3Folder",
+            "type": "AWS::S3::ObjectKey",
+            "description": "Temporary S3 folder"
+        }
+    ]
+}
+
