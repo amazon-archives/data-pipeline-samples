@@ -2,7 +2,7 @@
 
 #####A collection of AWS Data Pipeline templates and scripts used to backup & restore Amazon EFS file systems
 
-If you need to be able to recover from unintended changes or deletions in your Amazon EFS filesystems, you'll need to implement a backup solution. Once such backup solution is presented in the EFS documentation, and can be found here: http://docs.aws.amazon.com/efs/latest/ug/efs-backup.html.
+If you need to be able to recover from unintended changes or deletions in your Amazon EFS file systems, you'll need to implement a backup solution. Once such backup solution is presented in the EFS documentation, and can be found here: http://docs.aws.amazon.com/efs/latest/ug/efs-backup.html.
 
 In that backup solution, you'll create an AWS Data Pipeline to copy data from your Amazon EFS file system (called the production file system) to another Amazon EFS file system (called the backup file system). This solution consists of AWS Data Pipeline templates that implement the following:
 
