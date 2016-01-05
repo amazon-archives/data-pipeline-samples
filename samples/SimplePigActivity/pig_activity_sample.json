@@ -1,0 +1,100 @@
+{
+  "objects": [
+    {
+      "id": "Default",
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myLogUri}",
+      "scheduleType": "cron"
+    },
+    {
+      "id": "PigActivity1",
+      "input": {
+        "ref": "InputDataNode1"
+      },
+      "output": {
+        "ref": "OutputDataNode1"
+      },
+      "stage": "true",
+      "scriptUri": "#{myPigScriptUri}",
+      "name": "DefaultActivity1",
+      "runsOn": {
+        "ref": "EmrCluster1"
+      },
+      "type": "PigActivity",
+      "scriptVariable": [
+        "column1=First",
+        "column2=Second",
+        "three=3"
+      ],
+      "generatedScriptsPath": "#{myGeneratedScriptsPath}"
+    },
+    {
+      "id": "DefaultSchedule",
+      "occurrences": "1",
+      "period": "1 Day",
+      "name": "RunOnce",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "id": "InputDataNode1",
+      "directoryPath": "#{myS3Input}",
+      "dataFormat": {
+        "ref": "InputDataFormat1"
+      },
+      "type": "S3DataNode"
+    },
+    {
+      "id": "InputDataFormat1",
+      "inputRegEx": "^(\\\\S+) (\\\\S+) (\\\\S+) (\\\\S+) (\\\\S+) (\\\\S+) (\\\\S+) (\\\\S+) (\\\\S+) (\\\\S+)",
+      "column": [
+        "First STRING",
+        "Second STRING",
+        "Third STRING",
+        "Fourth STRING",
+        "Fifth STRING",
+        "Sixth STRING",
+        "Seventh STRING",
+        "Eighth STRING",
+        "Nineth STRING",
+        "Tenth STRING"        
+      ],
+      "type": "RegEx"
+    },
+    {
+      "id": "OutputDataNode1",
+      "directoryPath": "#{myS3Output}",
+      "dataFormat": {
+        "ref": "OutputDataFormat1"
+      },
+      "type": "S3DataNode"
+    },
+    {
+      "id": "OutputDataFormat1",
+      "column": [
+        "First STRING",
+        "Second STRING",
+        "Third STRING",
+        "Third STRING",
+        "Fourth STRING",
+        "Fifth STRING",
+        "Sixth STRING",
+        "Seventh STRING",
+        "Eighth STRING"
+      ],
+      "columnSeparator": "*",
+      "type": "Custom"
+    },
+    {
+      "id": "EmrCluster1",
+      "releaseLabel": "emr-4.2.0",
+      "type": "EmrCluster",
+      "terminateAfter": "1 Day"
+    }
+  ]
+}
