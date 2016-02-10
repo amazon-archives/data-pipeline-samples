@@ -1,0 +1,51 @@
+{
+  "objects": [
+  { 
+      "myComment": "This object is used to set default configuration for objects 
+      in the pipeline",
+
+      "id": "Default",
+      "failureAndRerunMode":"cascade",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myS3LogsPath}",
+      "scheduleType": "ondemand",
+  },
+  { 
+      "myComment": "This object is used to create the Amazon EC2 Instance that activities 
+      in the pipeline will be executed on.",
+
+      "id": "A_Fresh_NewEC2Instance",
+      "type": "Ec2Resource",
+      "terminateAfter": "1 Hour"
+  },
+  {
+     "myComment": "This object is a ShellCommandActivity. It is used to specify the linux 
+     shell command that will be invoked. In this case it is simply running the 'echo' command, 
+     but it can be used to run any command that is accessible on in the commandline shell of the 
+     Instance that runs on.",
+
+      "id": "ShellCommandActivity_HelloWorld",
+      "runsOn": {
+        "ref": "A_Fresh_NewEC2Instance"
+      },
+      "type": "ShellCommandActivity",
+      "command": "echo 'Hello World!'"
+    }
+],
+"parameters": [
+     {
+        "myComment": "Pipeline Parameters are placeholders for variables that a user can specify 
+        when uploading or activating the pipeline. In this example, we create a Parameter 
+        called 'myS3LogsPath' which is used to provide an S3 location for output logs. It is 
+        referenced above in the 'Default' object to set the 'pipelineLogUri' value. Parameters 
+        help users avoid hard coding variables in pipeline definitions. Users can supply these 
+        parameters when calling 'aws datapipeline put-pipeline-definition' or 'aws datapipeline
+        activate-pipeline-definition'.",
+
+        "id" : "myS3LogsPath",
+        "type" : "AWS::S3::ObjectKey",
+        "description" : "S3 path for pipeline logs."
+     }
+  ]
+}
