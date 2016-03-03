@@ -10,7 +10,7 @@ client = boto3.client('datapipeline')
 pipeline_id = 'df-123456789'
 
 def lambda_handler(event, context):
-   try:
+    try:
         response = client.activate_pipeline(pipelineId=pipeline_id)
         return response
     except Exception as e:
