@@ -1,0 +1,108 @@
+{
+  "objects": [
+    {
+      "myComment" : "Activity used to run the hive script to import CSV data",
+      "output": {
+        "ref": "DataNodeId_cnlSW"
+      },
+      "input": {
+        "ref": "DataNodeId_1ERqq"
+      },
+      "name": "TableRestoreActivity",
+      "hiveScript": "DROP TABLE IF EXISTS tempHiveTable;\n\nDROP TABLE IF EXISTS s3TempTable;\n\nCREATE EXTERNAL TABLE tempHiveTable (#{myDDBColDefn})\nSTORED BY 'org.apache.hadoop.hive.dynamodb.DynamoDBStorageHandler' \nTBLPROPERTIES (\"dynamodb.table.name\" = \"#{myDDBTableName}\", \"dynamodb.column.mapping\" = \"#{myDDBTableColMapping}\");\n                    \nCREATE EXTERNAL TABLE s3TempTable (#{myS3ColMapping})\nROW FORMAT DELIMITED FIELDS TERMINATED BY ',' LINES TERMINATED BY '\\\n' LOCATION '#{myInputS3Loc}';\n                    \nINSERT OVERWRITE TABLE tempHiveTable SELECT * FROM s3TempTable;",
+      "id": "TableRestoreActivity",
+      "runsOn": { "ref" : "EmrClusterForRestore" },
+      "stage": "false",
+      "type": "HiveActivity"
+    },
+    {
+      "myComment" : "The DynamoDB table from which we need to import data from",
+      "dataFormat": {
+        "ref": "DDBExportFormat"
+      },
+      "name": "DynamoDB",
+      "id": "DataNodeId_1ERqq",
+      "type": "DynamoDBDataNode",
+      "tableName": "#{myDDBTableName}"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myLogUri}",
+      "scheduleType": "ONDEMAND",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "name": "EmrClusterForRestore",
+      "coreInstanceType": "m1.medium",
+      "coreInstanceCount": "1",
+      "masterInstanceType": "m1.medium",
+      "releaseLabel": "emr-4.4.0",
+      "id": "EmrClusterForRestore",
+      "type": "EmrCluster",
+      "terminateAfter": "2 Hours"
+    },
+    {
+      "myComment" : "The S3 path from which we import data from",
+      "directoryPath": "#{myInputS3Loc}",
+      "dataFormat": {
+        "ref": "DataFormatId_xqWRk"
+      },
+      "name": "S3DataNode",
+      "id": "DataNodeId_cnlSW",
+      "type": "S3DataNode"
+    },
+    {
+      "myComment" : "Format for the S3 Path",
+      "name": "DefaultDataFormat1",
+      "column": "not_used STRING",
+      "id": "DataFormatId_xqWRk",
+      "type": "CSV"
+    },
+    {
+      "myComment" : "Format for the DynamoDB table",
+      "name": "DDBExportFormat",
+      "id": "DDBExportFormat",
+      "column": "not_used STRING",
+      "type": "DynamoDBExportDataFormat"
+    }
+  ],
+  "parameters": [
+    {
+      "description": "Input S3 folder",
+      "id": "myInputS3Loc",
+      "default": "s3://datapipeline-sample-csv/",
+      "type": "AWS::S3::ObjectKey"
+    },
+    {
+      "description": "DynamoDB table name",
+      "id": "myDDBTableName",
+      "type": "String"
+    },
+    {
+      "description": "S3 to DynamoDB Column Mapping",
+      "id": "myDDBTableColMapping",
+      "default" : "id:id,age:age,job:job,marital:marital,education:education,default:default,housing:housing,loan:loan,contact:contact,month:month,day_of_week:day_of_week,duration:duration,campaign:campaign,pdays:pdays,previous:previous,poutcome:poutcome,emp_var_rate:emp_var_rate,cons_price_idx:cons_price_idx,cons_conf_idx:cons_conf_idx,euribor3m:euribor3m,nr_employed:nr_employed,y:y",
+      "type": "String"
+    },
+    {
+      "description": "S3 Column Mappings",
+      "id": "myS3ColMapping",
+      "default" : "id string,age int,job string,marital string,education string,default string,housing string,loan string,contact string,month string,day_of_week string,duration int,campaign int,pdays int,previous int,poutcome string,emp_var_rate double,cons_price_idx double,cons_conf_idx double,euribor3m double,nr_employed double,y int",
+      "type": "String"
+    },
+    {
+      "description": "DynamoDB Column Mappings",
+      "id": "myDDBColDefn",
+      "default" : "id string,age bigint,job string,marital string,education string,default string,housing string,loan string,contact string,month string,day_of_week string,duration bigint,campaign bigint,pdays bigint,previous bigint,poutcome string,emp_var_rate double,cons_price_idx double,cons_conf_idx double,euribor3m double,nr_employed double,y bigint",
+      "type": "String"
+    },
+    {
+      "description": "DataPipeline Log Uri",
+      "id": "myLogUri",
+      "type": "AWS::S3::ObjectKey"
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "objects": [
+    {
+      "myComment": "This object is used to set default configuration for objects in the pipeline",
+      
+      "id": "Default",
+      "failureAndRerunMode": "CASCADE",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myS3LogsPath}",
+      "scheduleType": "ONDEMAND"
+    },
+    {
+      "myComment": "This object is used to create an Amazon EC2 Instance that activities in the pipeline can run on.",
+      
+      "type": "Ec2Resource",
+      "id": "New_EC2Instance",
+      "name": "New_EC2Instance",
+      "terminateAfter": "1 Hour",
+      "imageId": "#{myImageId}",
+      "region": "#{myRegion}",
+      "instanceType": "#{myInstanceType}",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole"
+    },
+    {
+      "myComment": "This object is a ShellCommandActivity. It is used to specify the command linux shell command that will be invoked. In this case, it invokes Lambda Function.",
+      
+      "id": "Invoke_Lambda_Activity",
+      "name": "Invoke_Lambda_Activity",
+      "type": "ShellCommandActivity",
+      "runsOn": {
+        "ref": "New_EC2Instance"
+      },
+      "command": "aws lambda  --region #{myRegion} invoke --function-name #{myLambdaFunction} outfile.txt"
+    }
+  ],
+  "parameters": [
+    {
+        "myComment": "This Parameter specifies the S3 logging path for the pipeline. It is used by the 'Default' object to set the 'pipelineLogUri' value. Using Parameters helps users avoid hard coding variables in pipeline definitions. Users can instead supply these parameters when calling 'aws datapipeline put-pipeline-definition' or 'aws datapipeline activate-pipeline-definition'.",
+
+        "id" : "myS3LogsPath",
+        "type" : "AWS::S3::ObjectKey",
+        "description" : "S3 path for pipeline logs."
+     },
+     {
+        "myComment": "This Parameter specifies the Lambda function name.",
+
+        "id" : "myLambdaFunction",
+        "type" : "String",
+        "description" : "Lambda Function name"
+     },
+     {
+        "myComment": "This Parameter specifies region",
+
+        "id" : "myRegion",
+        "type" : "String",
+        "default" : "us-east-1",
+        "description" : "Region"
+     },
+     {
+        "myComment": "This Parameter specifies image id",
+
+        "id" : "myImageId",
+        "type" : "String",
+        "default" : "ami-8fcee4e5",
+        "description" : "Image Id"
+     },
+     {
+        "myComment": "This Parameter specifies instance type",
+
+        "id" : "myInstanceType",
+        "type" : "String",
+        "default" : "m3.medium",
+        "description" : "Instance Type"
+     }
+  ]
+}
