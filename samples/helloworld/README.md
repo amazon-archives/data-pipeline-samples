@@ -23,7 +23,7 @@ will take a minute to complete, and when it's finished it will print the resourc
 S3 bucket that it created.
 
 ```sh
- $> python setup.py
+$> python setup.py
 # Creating resources for stack [dpl-samples-hello-world]...
 #   AWS::S3::Bucket: dpl-samples-hello-world-s3bucket-2bbt69s1j29c
 ```
@@ -34,7 +34,7 @@ Create a new pipeline. Throughout this section we assume that the HelloWorld sam
 your current working directory.
 
 ```sh
- $> aws datapipeline create-pipeline --name hello_world_pipeline --unique-id hello_world_pipeline 
+$> aws datapipeline create-pipeline --name hello_world_pipeline --unique-id hello_world_pipeline 
 # {
 #     "pipelineId": "df-074257336JDKJ6QWQCT4"
 # }
@@ -47,7 +47,7 @@ created.
 
 
 ```sh
-  $> aws datapipeline put-pipeline-definition --pipeline-id <your pipelineId> --pipeline-definition file://helloworld.json --parameter-values myS3LogsPath="s3://<your s3 logging path>"
+$> aws datapipeline put-pipeline-definition --pipeline-id <your pipelineId> --pipeline-definition file://helloworld.json --parameter-values myS3LogsPath="s3://<your s3 logging path>"
 # {
 #     "validationErrors": [],
 #     "validationWarnings": [],
@@ -58,7 +58,7 @@ created.
 Activate the pipeline. Use the `pipelineId` that was returned by the `create-pipeline` command.
 
 ```sh
-  $> aws datapipeline activate-pipeline --pipeline-id <your pipelineId>
+$> aws datapipeline activate-pipeline --pipeline-id <your pipelineId>
 ```
 
 Optionally, check the status of your running pipeline. Use the `pipelineId` that was returned by the
@@ -68,7 +68,7 @@ from this command will show FINISHED for all pipeine nodes. Note that it may tak
 
 ```sh
 
-  >$ aws datapipeline list-runs --pipeline-id <your pipelineId>
+>$ aws datapipeline list-runs --pipeline-id <your pipelineId>
 #          Name                                                Scheduled Start      Status                 
 #          ID                                                  Started              Ended              
 #   ---------------------------------------------------------------------------------------------------
@@ -92,14 +92,14 @@ Once the pipeline is completed, you can delete it with the following command. If
 sample again without deleting, you may receive errors or unexpected behavior.
 
 ```sh
- $> aws datapipeline delete-pipeline --pipeline-id <your pipelineId>
+$> aws datapipeline delete-pipeline --pipeline-id <your pipelineId>
 ```
 
 The resources used by this example will incur normal charges. If you provisioned resources using the
 setup script, you can free them by running the following command in the HelloWorld sample directory.
 
 ```sh
- $> python setup.py --teardown
+$> python setup.py --teardown
 # Request to delete stack [dpl-samples-hello-world] has been sent
 ```
 
