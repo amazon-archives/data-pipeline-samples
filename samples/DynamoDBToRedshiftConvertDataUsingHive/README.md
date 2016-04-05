@@ -74,7 +74,7 @@ $> aws datapipeline put-pipeline-definition --pipeline-id df-0554887H4KXKTY59MRJ
         myRedshiftEndpoint=<RedshiftEndpoint> \
         myRedshiftPrimaryKeys="Id,ReplyDateTime" \
         myRedshiftTable=<RedshiftTable> \
-        myRedshiftCreateTableQuery="create table IF NOT EXISTS grindr \(Id varchar\(2048\) not null distkey, ReplyDateTime varchar\(2048\) not null sortkey, Message varchar\(2048\), ExtendedMessage varchar\(2048\), PostedBy varchar\(2048\)\);" \
+        myRedshiftCreateTableQuery="create table IF NOT EXISTS reply \(Id varchar\(2048\) not null distkey, ReplyDateTime varchar\(2048\) not null sortkey, Message varchar\(2048\), ExtendedMessage varchar\(2048\), PostedBy varchar\(2048\)\);" \
         myUsername=<username> \
         myPassword=<password>
 # You receive a validation messages like this
