@@ -1,0 +1,36 @@
+{
+  "objects": [
+    {
+      "name": "EmrClusterForBackup",
+      "coreInstanceType": "m1.medium",
+      "coreInstanceCount": "1",
+      "masterInstanceType": "m1.medium",
+      "amiVersion": "3.3.2",
+      "id": "EmrClusterForBackup",
+      "type": "EmrCluster",
+      "terminateAfter": "2 Hours"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "scheduleType": "ondemand",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "name": "TableBackupActivity",
+      "scriptUri":"s3://datapipeline-samples/JsonToDynamoDb/json_to_ddb.q",
+      "runsOn": {
+        "ref" : "EmrClusterForBackup"
+      },
+      "id": "TableBackupActivity",
+      "type": "HiveActivity",
+      "stage":"false",
+      "myComment": "Activity used to run the hive script to export data"
+    }
+  ]
+}
