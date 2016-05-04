@@ -1,0 +1,58 @@
+{
+  "objects": [
+    {
+      "name": "DefaultProperty1",
+      "id": "PropertyId_jVPFN",
+      "type": "Property",
+      "value": "true",
+      "key": "maximizeResourceAllocation"
+    },
+    {
+      "name": "DefaultEmrActivity1",
+      "step": "command-runner.jar,spark-submit,--class,org.apache.spark.examples.SparkPi,/usr/lib/spark/lib/spark-examples.jar,100",
+      "runsOn": {
+        "ref": "EmrClusterId_mD6dg"
+      },
+      "id": "EmrActivityId_Bo5Zd",
+      "type": "EmrActivity"
+    },
+    {
+      "configuration": {
+        "ref": "EmrConfigurationId_uXera"
+      },
+      "name": "DefaultEmrCluster1",
+      "coreInstanceCount": "1",
+      "coreInstanceType": "m3.xlarge",
+      "releaseLabel": "emr-4.6.0",
+      "masterInstanceType": "m3.xlarge",
+      "id": "EmrClusterId_mD6dg",
+      "type": "EmrCluster",
+      "terminateAfter": "45 Minutes",
+      "applications": "spark"
+    },
+    {
+      "name": "DefaultEmrConfiguration1",
+      "property": {
+        "ref": "PropertyId_jVPFN"
+      },
+      "id": "EmrConfigurationId_uXera",
+      "type": "EmrConfiguration",
+      "classification": "spark"
+    },
+    {
+      "failureAndRerunMode": "CASCADE",
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myPipelineLogUri}",
+      "scheduleType": "ONDEMAND",
+      "name": "Default",
+      "id": "Default"
+    }
+  ],
+  "parameters": [
+    {
+       "id" : "myPipelineLogUri",
+       "type" : "AWS::S3::ObjectKey",
+       "description" : "Please specify the logs location"
+     }]
+}

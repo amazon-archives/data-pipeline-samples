@@ -33,8 +33,7 @@
       },
       "id": "RedshiftLoadActivity",
       "type": "RedshiftCopyActivity",
-      "insertMode": "OVERWRITE_EXISTING",
-      "commandOptions": ["EMPTYASNULL", "IGNOREBLANKLINES"]
+      "insertMode": "OVERWRITE_EXISTING"
     },
     {
       "connectionString": "#{myRedshiftJdbcConnectStr}",
