@@ -4,19 +4,9 @@
 
 ## Parameters
 
-<table>
-
-<tr><th>Parameter</th><th>Required</th><th>Description</th></tr>
-
-<tr>
-<td>{{Parameter Name}}</td>
-<td>{{yes/no}}</td>
-<td>
-{{Description}} {{Example or Default}}
-</td>
-</tr>
-
-</table>
+Parameter | Required | Description
+----------|----------|------------
+{{Parameter Name}} | {{yes/no}} | {{Description}} {{Example or Default}}
 
 ## Setup (Optional)
 
