@@ -1,0 +1,210 @@
+{
+  "objects": [
+    {
+      "failureAndRerunMode": "CASCADE",
+      "schedule": {
+        "ref": "DefaultSchedule"
+      },
+      "resourceRole": "DataPipelineDefaultResourceRole",
+      "role": "DataPipelineDefaultRole",
+      "pipelineLogUri": "#{myLogUri}",
+      "scheduleType": "cron",
+      "name": "Default",
+      "id": "Default"
+    },
+    {
+      "occurrences": "1",
+      "period": "1 Day",
+      "name": "RunOnce",
+      "id": "DefaultSchedule",
+      "type": "Schedule",
+      "startAt": "FIRST_ACTIVATION_DATE_TIME"
+    },
+    {
+      "connectionString": "#{myRedshiftJdbcConnectStr}",
+      "databaseName": "#{myRedshiftDbName}",
+      "*password": "#{*myRedshiftPassword}",
+      "name": "RedshiftCluster",
+      "id": "RedshiftCluster",
+      "type": "RedshiftDatabase",
+      "username": "#{myRedshiftUsername}"
+    },
+    {
+      "securityGroupIds": "#{myRedshiftSecurityGrpIds}",
+      "instanceType": "m3.xlarge",
+      "name": "Ec2Instance",
+      "associatePublicIpAddress": "true",
+      "id": "Ec2Instance",
+      "type": "Ec2Resource",
+      "region": "us-east-1",
+      "terminateAfter": "10 Hours",
+      "availabilityZone": "us-east-1c"
+    },
+    {
+      "output": {
+        "ref": "DestRedshiftTable_1"
+      },
+      "input": {
+        "ref": "Input_S3_Tsv_File_1"
+      },
+      "name": "ExportS3ToRedshift_1",
+      "runsOn": {
+        "ref": "Ec2Instance"
+      },
+      "precondition" : { 
+        "ref" : "PreconditionId_1"
+      },
+      "id": "RedshiftLoadActivity_1",
+      "type": "RedshiftCopyActivity",
+      "insertMode": "OVERWRITE_EXISTING"
+    },
+    {
+      "filePath": "#{myInputTsvFilesS3Loc_1}",
+      "name": "Input_S3_Tsv_File_1",
+      "id": "Input_S3_Tsv_File_1",
+      "dataFormat": {
+        "ref": "DataFormatId_tsv"
+      },
+      "type": "S3DataNode"
+    },
+    {
+      "database": {
+        "ref": "RedshiftCluster"
+      },
+      "name": "DestRedshiftTable_1",
+      "id": "DestRedshiftTable_1",
+      "schemaName": "PUBLIC",
+      "type": "RedshiftDataNode",
+      "tableName": "#{myDestRedshiftTable_1}"
+    },
+    {
+      "name": "S3TRDataFormat",
+      "id": "DataFormatId_tsv",
+      "type": "TSV"
+    },
+    {
+      "id" : "PreconditionId_1",
+      "name" : "S3KeyExistCheckPrecondition_1",
+      "role" : "DataPipelineDefaultRole",
+      "s3Key" : "#{myInputTsvFilesS3Loc_1}",
+      "type" : "S3KeyExists"
+    },
+    {
+      "output": {
+        "ref": "DestRedshiftTable_2"
+      },
+      "input": {
+        "ref": "Input_S3_Tsv_File_2"
+      },
+      "name": "ExportS3ToRedshift_2",
+      "runsOn": {
+        "ref": "Ec2Instance"
+      },
+      "precondition" : { 
+        "ref" : "PreconditionId_2"
+      },
+      "id": "RedshiftLoadActivity_2",
+      "type": "RedshiftCopyActivity",
+      "insertMode": "OVERWRITE_EXISTING"
+    },
+    {
+      "filePath": "#{myInputTsvFilesS3Loc_2}",
+      "name": "Input_S3_Tsv_File_2",
+      "id": "Input_S3_Tsv_File_2",
+      "dataFormat": {
+        "ref": "DataFormatId_tsv"
+      },
+      "type": "S3DataNode"
+    },
+    {
+      "database": {
+        "ref": "RedshiftCluster"
+      },
+      "name": "DestRedshiftTable_2",
+      "id": "DestRedshiftTable_2",
+      "schemaName": "PUBLIC",
+      "type": "RedshiftDataNode",
+      "tableName": "#{myDestRedshiftTable_2}"
+    },
+    {
+      "id" : "PreconditionId_2",
+      "name" : "S3KeyExistCheckPrecondition_2",
+      "role" : "DataPipelineDefaultRole",
+      "s3Key" : "#{myInputTsvFilesS3Loc_2}",
+      "type" : "S3KeyExists"
+    }
+
+  ],
+  "parameters": [
+    {
+      "description": "Redshift password",
+      "id": "*myRedshiftPassword",
+      "type": "String"
+    },
+    {
+      "description": "Redshift database name",
+      "id": "myRedshiftDbName",
+      "type": "String"
+    },
+    {
+      "watermark": "security group id. E.g.,",
+      "helpText": "The names of one or more security groups that are assigned to the Redshift cluster.",
+      "description": "Security group Id(s)",
+      "isArray": "true",
+      "id": "myRedshiftSecurityGrpIds",
+      "type": "String"
+    },
+    {
+      "description": "Redshift username",
+      "id": "myRedshiftUsername",
+      "type": "String"
+    },
+    {
+      "allowedValues": "OVERWRITE_EXISTING",
+      "default": "OVERWRITE_EXISTING",
+      "helpLink": "https://docs.aws.amazon.com/console/datapipeline/redshiftcopyactivity",
+      "helpText": "Determines how to handle pre-existing data in the target table that overlaps with rows in the data to be loaded.",
+      "description": "Table insert mode",
+      "id": "myInsertMode",
+      "type": "String"
+    },
+    {
+      "watermark": "jdbc:postgresql://endpoint:port/database?tcpKeepAlive=true",
+      "description": "Redshift JDBC connection string",
+      "id": "myRedshiftJdbcConnectStr",
+      "type": "String"
+    },
+    {
+      "helpText": "The S3 file 1.",
+      "description": "Input S3 file 1",
+      "id": "myInputTsvFilesS3Loc_1",
+      "type": "AWS::S3::ObjectKey",
+      "watermark" : "s3://tsv-files-insert-loc/2015-10-27-01-00-29"
+    },
+    {
+      "helpText": "The name of an existing table or a new table that will be created based on the create table SQL query parameter below.",
+      "description": "Redshift table name for file 1",
+      "id": "myDestRedshiftTable_1",
+      "type": "String"
+    },
+    {
+      "helpText": "The S3 file 2.",
+      "description": "Input S3 file 2",
+      "id": "myInputTsvFilesS3Loc_2",
+      "type": "AWS::S3::ObjectKey",
+      "watermark" : "s3://tsv-files-insert-loc/2015-10-27-01-00-29"
+    },
+    {
+      "helpText": "The name of an existing table or a new table that will be created based on the create table SQL query parameter below.",
+      "description": "Redshift table name for file 2",
+      "id": "myDestRedshiftTable_2",
+      "type": "String"
+    },
+    {
+      "helpText": "The Log location in S3.",
+      "description": "S3 uri for pipeline logs",
+      "id": "myLogUri",
+      "type": "String"
+    }
+  ]
+}
