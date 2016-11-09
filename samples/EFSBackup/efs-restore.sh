@@ -14,10 +14,10 @@ echo 'sudo mkdir /backup'
 sudo mkdir /backup
 echo 'sudo mkdir /mnt/backups'
 sudo mkdir /mnt/backups
-echo "sudo mount -t nfs $source /backup"
-sudo mount -t nfs $source /backup
-echo "sudo mount -t nfs $destination /mnt/backups"
-sudo mount -t nfs $destination /mnt/backups
+echo "sudo mount -t nfs -o nfsvers=4.1 -o rsize=1048576 -o wsize=1048576 -o timeo=600 -o retrans=2 -o hard $source /backup"
+sudo mount -t nfs -o nfsvers=4.1 -o rsize=1048576 -o wsize=1048576 -o timeo=600 -o retrans=2 -o hard $source /backup
+echo "sudo mount -t nfs -o nfsvers=4.1 -o rsize=1048576 -o wsize=1048576 -o timeo=600 -o retrans=2 -o hard $destination /mnt/backups"
+sudo mount -t nfs -o nfsvers=4.1 -o rsize=1048576 -o wsize=1048576 -o timeo=600 -o retrans=2 -o hard $destination /mnt/backups
 
 if [ ! sudo test -d /mnt/backups/$efsid/$interval.$backupNum/ ]; then
   echo "EFS Backup $efsid/$interval.$backupNum does not exist!"
