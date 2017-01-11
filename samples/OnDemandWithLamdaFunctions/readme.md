@@ -88,11 +88,11 @@ Add the notification on S3 and have it call the Lamda function:
 \*Make sure your notification configuration contains ``s3:ObjectCreated:*`` events
 
 ```sh
-  $> aws s3api put-bucket-notification --bucket <your bucket name> --notification-configuration <your-cloud-function notification-configuration>
+  $> aws s3api put-bucket-notification-configuration --bucket <your bucket name> --notification-configuration <your-cloud-function notification-configuration>
 ```
 
-See this link for reference on the s3api put-bucket-notification command:  
-http://docs.aws.amazon.com/cli/latest/reference/s3api/put-bucket-notification.html
+See this link for reference on the s3api put-bucket-notification-configuration command:  
+http://docs.aws.amazon.com/cli/latest/reference/s3api/put-bucket-notification-configuration.html
 
 Upload a file to the S3 bucket and make validate the lamda function activated your pipeline:
 
