@@ -90,6 +90,13 @@ Backup EFS mount target IP address.
 Shell command to run.
 </td>
 </tr>
+<tr>
+<td>myImageID</td>
+<td>yes</td>
+<td>
+AMI ID to launch your backup instance. Latest Amazon Linux AMI recommended - https://aws.amazon.com/amazon-linux-ami/. 
+</td>
+</tr>
 
 </table>
 
