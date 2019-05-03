@@ -93,6 +93,4 @@ them.
 
 *Use at your own risk.*
 
-Copyright 2011-2015 Amazon.com, Inc. or its affiliates. All Rights Reserved. Licensed under the
-[Amazon Software License](http://aws.amazon.com/asl/).
-
+Licensed under the MIT-0 License.

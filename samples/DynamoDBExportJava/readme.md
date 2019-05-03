@@ -41,9 +41,4 @@ production environments. Users should carefully inspect code samples before runn
 
 Use at your own risk.
 
-Copyright 2011-2013 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-
-Licensed under the Amazon Software License (the "License"). You may not use this file except in compliance with the 
-License. A copy of the License is located at
-
-http://aws.amazon.com/asl/
+Licensed under the MIT-0 License.

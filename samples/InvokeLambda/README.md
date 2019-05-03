@@ -66,8 +66,4 @@ The samples in this repository are meant to help users get started with Data Pip
 
 Use at your own risk.
 
-Copyright 2011-2016 Amazon.com, Inc. or its affiliates. All Rights Reserved.
-
-Licensed under the Amazon Software License (the "License"). You may not use this file except in compliance with the License. A copy of the License is located at
-
-http://aws.amazon.com/asl/
+Licensed under the MIT-0 License.
